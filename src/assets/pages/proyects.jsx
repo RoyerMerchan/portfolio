@@ -37,7 +37,7 @@ const projects = [
 
 const ProjectCarousel = () => {
   return (
-    <div className="pt-24 px-6"> {/* pt-24 para que no lo tape el navbar */}
+    <div className="pt-24 px-4 sm:px-6">
       <Swiper
         modules={[Navigation]}
         navigation
@@ -46,15 +46,15 @@ const ProjectCarousel = () => {
       >
         {projects.map((project, index) => (
           <SwiperSlide key={index}>
-            <div className="flex bg-white rounded-lg shadow-lg overflow-hidden max-w-3xl mx-auto">
+            <div className="flex flex-col sm:flex-row bg-white rounded-lg shadow-lg overflow-hidden max-w-3xl mx-auto">
               <img
                 src={project.image}
                 alt={project.title}
-                className="w-1/3 object-cover"
+                className="w-full sm:w-1/3 h-48 sm:h-auto object-cover"
               />
-              <div className="p-6 w-2/3">
-                <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
-                <p className="text-gray-700">{project.description}</p>
+              <div className="p-4 sm:p-6 w-full sm:w-2/3">
+                <h3 className="text-lg sm:text-xl font-bold mb-2">{project.title}</h3>
+                <p className="text-sm sm:text-base text-gray-700">{project.description}</p>
               </div>
             </div>
           </SwiperSlide>
