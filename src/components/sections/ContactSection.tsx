@@ -10,8 +10,8 @@ import { getIcon } from '@/lib/icons'
 const contactInfo = [
   {
     label: 'Email',
-    value: 'royermerchan@email.com',
-    href: 'mailto:royermerchan@email.com',
+    value: 'alejandromerchanserrano@gmail.com',
+    href: 'mailto:alejandromerchanserrano@gmail.com',
     iconName: 'Mail',
   },
   {
@@ -22,14 +22,14 @@ const contactInfo = [
   },
   {
     label: 'LinkedIn',
-    value: 'Royer Merchán',
-    href: 'https://www.linkedin.com/in/royer-merchan-399741385',
+    value: 'Royer Merchan',
+    href: 'https://www.linkedin.com/in/royer-merchan-29545579',
     iconName: 'Linkedin',
   },
   {
     label: 'WhatsApp',
-    value: '+57 300 123 4567',
-    href: 'https://wa.me/573001234567',
+    value: '+58 414 736 7490',
+    href: 'https://wa.me/584147367490',
     iconName: 'MessageCircle',
   },
 ]

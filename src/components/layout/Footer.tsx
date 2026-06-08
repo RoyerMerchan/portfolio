@@ -19,7 +19,7 @@ export default function Footer() {
               RM
             </div>
             <span className="font-semibold text-sm text-white">
-              Royer<span className="text-gray-500 ml-1">Merchán</span>
+              Royer<span className="text-gray-500 ml-1">Merchan</span>
             </span>
           </div>
 
@@ -53,7 +53,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-8 border-t border-white/[0.06] text-center">
           <p className="text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Royer Merchán. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} Royer merchan. Todos los derechos reservados.
           </p>
         </div>
       </div>

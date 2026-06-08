@@ -11,7 +11,7 @@ export const socials: Social[] = [
     name: 'LinkedIn',
     url: 'https://www.linkedin.com/in/royer-merchan-399741385',
     iconName: 'Linkedin',
-    label: 'Royer Merchán',
+    label: 'Royer merchan',
   },
   {
     name: 'Email',

@@ -71,7 +71,7 @@ export default function Hero() {
           >
             Royer{' '}
             <span className="bg-gradient-to-r from-[#7C3AED] via-[#8B5CF6] to-[#06B6D4] bg-clip-text text-transparent">
-              Merchán
+              merchan
             </span>
           </motion.h1>
 
