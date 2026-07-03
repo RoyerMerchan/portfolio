@@ -54,7 +54,7 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-8">
-              Soy ingeniero de sistemas con experiencia en el desarrollo de
+              Soy ingeniero en Computación con experiencia en el desarrollo de
               sistemas empresariales, APIs, dashboards administrativos y
               automatización de procesos. Me especializo en construir
               soluciones reales que resuelven problemas concretos de negocio.
