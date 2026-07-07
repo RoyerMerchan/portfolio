@@ -38,7 +38,7 @@ export default function Navbar() {
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         scrolled
-          ? 'bg-[#050816]/80 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20'
+          ? 'bg-[var(--color-bg)]/80 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20'
           : 'bg-transparent'
       )}
     >
@@ -95,7 +95,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden bg-[#050816]/95 backdrop-blur-xl border-b border-white/[0.06]"
+            className="md:hidden bg-[var(--color-bg)]/95 backdrop-blur-xl border-b border-white/[0.06]"
           >
             <div className="px-4 pb-6 flex flex-col gap-1">
               {navLinks.map((link) => {

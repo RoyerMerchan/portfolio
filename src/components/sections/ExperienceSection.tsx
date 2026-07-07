@@ -34,7 +34,7 @@ export default function ExperienceSection() {
                 }`}
               >
                 {/* Timeline dot */}
-                <div className="absolute left-6 md:left-1/2 w-12 h-12 -translate-x-1/2 rounded-full bg-[#050816] border-2 border-[#7C3AED]/50 flex items-center justify-center z-10 shadow-lg shadow-[#7C3AED]/20">
+                <div className="absolute left-6 md:left-1/2 w-12 h-12 -translate-x-1/2 rounded-full bg-[var(--color-bg)] border-2 border-[#7C3AED]/50 flex items-center justify-center z-10 shadow-lg shadow-[#7C3AED]/20">
                   <Icon className="w-5 h-5 text-[#7C3AED]" />
                 </div>
 

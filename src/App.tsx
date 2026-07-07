@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import Hero from '@/components/sections/Hero'
@@ -57,17 +58,19 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#050816]">
-      <Navbar />
-      <main className="flex-1">
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/proyects" element={<RedirectToHome />} />
-          <Route path="/skill" element={<RedirectToHome />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div className="flex flex-col min-h-screen bg-[var(--color-bg)]">
+        <Navbar />
+        <main className="flex-1">
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/proyects" element={<RedirectToHome />} />
+            <Route path="/skill" element={<RedirectToHome />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </MotionConfig>
   )
 }

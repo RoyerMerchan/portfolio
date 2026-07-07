@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
+import { motion, useInView, useReducedMotion, animate } from 'framer-motion'
 import SectionHeader from '@/components/ui/SectionHeader'
 import { stats } from '@/data/stats'
 import { getIcon } from '@/lib/icons'
@@ -17,12 +17,26 @@ function AnimatedCounter({
 }) {
   const ref = useRef<HTMLSpanElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
+  const prefersReducedMotion = useReducedMotion()
+  const [display, setDisplay] = useState(0)
 
-  const displayValue = isInView ? value : 0
+  useEffect(() => {
+    if (!isInView) return
+    if (prefersReducedMotion) {
+      setDisplay(value)
+      return
+    }
+    const controls = animate(0, value, {
+      duration,
+      ease: 'easeOut',
+      onUpdate: (latest) => setDisplay(Math.round(latest)),
+    })
+    return () => controls.stop()
+  }, [isInView, value, duration, prefersReducedMotion])
 
   return (
     <span ref={ref} className="tabular-nums">
-      {displayValue}
+      {display}
       {suffix}
     </span>
   )

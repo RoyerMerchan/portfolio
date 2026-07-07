@@ -44,9 +44,9 @@ export default function Hero() {
           fetchPriority="high"
         />
         {/* Left→right scrim keeps the headline legible over the art */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050816] via-[#050816]/92 to-[#050816]/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg)] via-[var(--color-bg)]/80 to-[var(--color-bg)]/25" />
         {/* Top + bottom fades blend into the navbar and the next section */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050816]/70 via-transparent to-[#050816]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/50 via-transparent to-[var(--color-bg)]" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full pt-32 pb-20">
