@@ -13,7 +13,6 @@ const techBadges = [
 export default function Hero() {
   const DownloadIcon = getIcon('Download')
   const ArrowRightIcon = getIcon('ArrowRight')
-  const TerminalIcon = getIcon('Terminal')
   const SparklesIcon = getIcon('Sparkles')
 
   const containerVariants = {
@@ -36,19 +35,18 @@ export default function Hero() {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background Effects */}
+      {/* Background: pixel-art dev illustration + legibility scrim */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] rounded-full bg-[#7C3AED]/20 blur-[120px]" />
-        <div className="absolute bottom-1/4 -right-32 w-[400px] h-[400px] rounded-full bg-[#06B6D4]/15 blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#7C3AED]/5 blur-[150px]" />
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
-          }}
+        <img
+          src="/hero-merchan.jpg"
+          alt="Royer Merchán programando entre monitores con código"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          fetchPriority="high"
         />
+        {/* Left→right scrim keeps the headline legible over the art */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050816] via-[#050816]/92 to-[#050816]/45" />
+        {/* Top + bottom fades blend into the navbar and the next section */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050816]/70 via-transparent to-[#050816]" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full pt-32 pb-20">
@@ -70,7 +68,7 @@ export default function Hero() {
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight"
           >
             Royer{' '}
-            <span className="bg-gradient-to-r from-[#7C3AED] via-[#8B5CF6] to-[#06B6D4] bg-clip-text text-transparent">
+            <span className="text-[var(--color-primary)]">
               merchan
             </span>
           </motion.h1>
@@ -123,34 +121,6 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* Terminal decorative */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.2, ease: 'easeOut' }}
-          className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-[380px]"
-        >
-          <div className="rounded-xl bg-white/[0.04] border border-white/[0.1] backdrop-blur-xl overflow-hidden shadow-2xl shadow-black/30">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
-              <span className="ml-2 text-xs text-gray-500 font-mono">terminal</span>
-            </div>
-            <div className="p-5 font-mono text-xs leading-relaxed">
-              <div className="text-gray-500">$ <span className="text-green-400">~/portfolio</span> git status</div>
-              <div className="text-gray-400 mt-1">On branch main</div>
-              <div className="text-gray-400">Your branch is up to date</div>
-              <div className="mt-3 text-gray-500">$ <span className="text-green-400">~/portfolio</span> npm run dev</div>
-              <div className="text-[#7C3AED] mt-1">&gt; royer-merchan@1.0.0 dev</div>
-              <div className="text-[#06B6D4]">&gt; Ready on port 3000</div>
-              <div className="flex items-center gap-2 mt-3 text-gray-500">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span>Sistema listo — 12 proyectos desplegados</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
 
       {/* Scroll indicator */}
@@ -160,7 +130,7 @@ export default function Hero() {
         transition={{ delay: 2, duration: 1 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
-        <span className="text-xs text-gray-500">Scroll</span>
+        <span className="text-xs text-gray-400">Scroll</span>
         <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1.5">
           <motion.div
             animate={{ y: [0, 8, 0] }}

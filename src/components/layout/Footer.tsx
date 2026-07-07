@@ -19,7 +19,7 @@ export default function Footer() {
               RM
             </div>
             <span className="font-semibold text-sm text-white">
-              Royer<span className="text-gray-500 ml-1">Merchan</span>
+              Royer<span className="text-gray-400 ml-1">Merchan</span>
             </span>
           </div>
 
@@ -32,7 +32,7 @@ export default function Footer() {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-white transition-colors duration-200 p-2 rounded-lg hover:bg-white/5"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 p-2 rounded-lg hover:bg-white/5"
                   aria-label={social.name}
                 >
                   <Icon className="w-5 h-5" />
@@ -43,7 +43,7 @@ export default function Footer() {
 
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors duration-200"
+            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors duration-200"
             aria-label="Volver al inicio"
           >
             <ArrowUpIcon className="w-4 h-4" />
@@ -52,7 +52,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/[0.06] text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             &copy; {new Date().getFullYear()} Royer merchan. Todos los derechos reservados.
           </p>
         </div>

@@ -55,7 +55,7 @@ export default function StatsSection() {
                 <div className="text-3xl font-bold text-white mb-1">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="text-sm text-gray-500">{stat.label}</p>
+                <p className="text-sm text-gray-400">{stat.label}</p>
               </motion.div>
             )
           })}

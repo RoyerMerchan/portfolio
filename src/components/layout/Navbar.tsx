@@ -73,7 +73,7 @@ export default function Navbar() {
           ))}
           <button
             onClick={() => scrollTo('contact')}
-            className="ml-4 px-5 py-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg shadow-[#7C3AED]/25 hover:shadow-[#7C3AED]/40"
+            className="ml-4 px-5 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-medium rounded-lg transition-all duration-200 shadow-lg shadow-[#7C3AED]/25 hover:shadow-[#7C3AED]/40"
           >
             Contacto
           </button>

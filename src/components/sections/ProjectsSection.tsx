@@ -60,7 +60,7 @@ export default function ProjectsSection() {
                     )}
 
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                      <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">
                         {project.type}
                       </span>
                       <span
@@ -84,7 +84,7 @@ export default function ProjectsSection() {
                     {project.highlights.length > 0 && (
                       <ul className="space-y-1.5 mb-4">
                         {project.highlights.slice(0, 3).map((h, i) => (
-                          <li key={i} className="flex items-start gap-2 text-xs text-gray-500">
+                          <li key={i} className="flex items-start gap-2 text-xs text-gray-400">
                             <span className="mt-1.5 w-1 h-1 rounded-full bg-[#7C3AED] flex-shrink-0" />
                             {h}
                           </li>

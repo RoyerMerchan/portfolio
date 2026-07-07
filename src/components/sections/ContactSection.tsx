@@ -74,7 +74,7 @@ export default function ContactSection() {
                       <Icon className="w-5 h-5 text-[#7C3AED]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs text-gray-500">{item.label}</p>
+                      <p className="text-xs text-gray-400">{item.label}</p>
                       <p className="text-sm font-medium text-white truncate">
                         {item.value}
                       </p>
