@@ -49,9 +49,9 @@ export default function Navbar() {
           aria-label="Ir al inicio"
         >
           <img
-            src="/avatar-royer.jpg"
-            alt="Royer Merchán"
-            className="w-9 h-9 rounded-full object-cover border border-white/20 shadow-lg shadow-[#7C3AED]/25 group-hover:shadow-[#7C3AED]/40 transition-shadow duration-300"
+            src="/logo-rm.png"
+            alt="RM — Royer Merchán"
+            className="h-9 w-auto object-contain group-hover:opacity-80 transition-opacity duration-300"
           />
           <span className="font-semibold text-sm sm:text-base text-white hidden sm:block">
             ROYER<span className="text-gray-400 ml-1">MERCHAN</span>

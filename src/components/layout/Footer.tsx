@@ -16,9 +16,9 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-2">
             <img
-              src="/avatar-royer.jpg"
-              alt="Royer Merchán"
-              className="w-8 h-8 rounded-full object-cover border border-white/15"
+              src="/logo-rm.png"
+              alt="RM — Royer Merchán"
+              className="h-8 w-auto object-contain"
             />
             <span className="font-semibold text-sm text-white">
               Royer<span className="text-gray-400 ml-1">Merchan</span>
