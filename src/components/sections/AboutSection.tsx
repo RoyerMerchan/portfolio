@@ -35,8 +35,8 @@ export default function AboutSection() {
             <div className="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto md:mx-0">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] blur-2xl opacity-30" />
               <img
-                src="/imageme.jpg"
-                alt="Royer merchan"
+                src="/about-merchan.jpg"
+                alt="Royer Merchán, desarrollador fullstack"
                 className="relative w-full h-full object-cover rounded-2xl border-2 border-white/[0.12] shadow-2xl"
               />
             </div>

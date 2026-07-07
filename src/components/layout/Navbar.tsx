@@ -48,9 +48,11 @@ export default function Navbar() {
           className="flex items-center gap-2 group"
           aria-label="Ir al inicio"
         >
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-[#7C3AED]/25 group-hover:shadow-[#7C3AED]/40 transition-shadow duration-300">
-            RM
-          </div>
+          <img
+            src="/avatar-royer.jpg"
+            alt="Royer Merchán"
+            className="w-9 h-9 rounded-full object-cover border border-white/20 shadow-lg shadow-[#7C3AED]/25 group-hover:shadow-[#7C3AED]/40 transition-shadow duration-300"
+          />
           <span className="font-semibold text-sm sm:text-base text-white hidden sm:block">
             ROYER<span className="text-gray-400 ml-1">MERCHAN</span>
           </span>
