@@ -21,7 +21,7 @@ export default function AboutSection() {
       <div className="max-w-7xl mx-auto gutter">
         <SectionHeader
           title="Sobre mí"
-          subtitle="Ingeniero de sistemas apasionado por construir soluciones empresariales robustas"
+          subtitle="Ingeniero en Computación apasionado por construir soluciones empresariales robustas"
         />
 
         <div className="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center">
