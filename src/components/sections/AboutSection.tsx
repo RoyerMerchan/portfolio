@@ -17,14 +17,14 @@ export default function AboutSection() {
   const QuoteIcon = getIcon('Quote')
 
   return (
-    <section id="about" className="relative py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section id="about" className="relative section-y">
+      <div className="max-w-7xl mx-auto gutter">
         <SectionHeader
           title="Sobre mí"
           subtitle="Ingeniero de sistemas apasionado por construir soluciones empresariales robustas"
         />
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -32,18 +32,18 @@ export default function AboutSection() {
             transition={{ duration: 0.6 }}
             className="relative"
           >
-            <div className="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto md:mx-0">
+            {/* The quote badge anchors to the portrait, not the column — otherwise it
+                drifts to the far corner once the grid collapses to one column. */}
+            <div className="relative w-56 h-56 sm:w-72 sm:h-72 mx-auto md:mx-0">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] blur-2xl opacity-30" />
               <img
                 src="/about-merchan.jpg"
                 alt="Royer Merchán, desarrollador fullstack"
                 className="relative w-full h-full object-cover rounded-2xl border-2 border-white/[0.12] shadow-2xl"
               />
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 hidden sm:flex items-center justify-center backdrop-blur-xl">
-              <QuoteIcon className="w-8 h-8 text-[#7C3AED]" />
+              <div className="absolute -bottom-4 -right-4 w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 hidden sm:flex items-center justify-center backdrop-blur-xl">
+                <QuoteIcon className="w-7 h-7 sm:w-8 sm:h-8 text-[#7C3AED]" />
+              </div>
             </div>
           </motion.div>
 
@@ -53,13 +53,13 @@ export default function AboutSection() {
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-8">
+            <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8 text-pretty">
               Soy ingeniero en Computación con experiencia en el desarrollo de
               sistemas empresariales, APIs, dashboards administrativos y
               automatización de procesos. Me especializo en construir
               soluciones reales que resuelven problemas concretos de negocio.
             </p>
-            <p className="text-gray-400 leading-relaxed mb-8">
+            <p className="text-gray-400 leading-relaxed mb-6 sm:mb-8 text-pretty">
               Mi enfoque combina frontend moderno con React y TypeScript,
               backend robusto con Node.js y Go, y una sólida base en
               infraestructura con Docker, Traefik y monitoreo proactivo.

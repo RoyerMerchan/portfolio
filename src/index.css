@@ -19,23 +19,52 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Page gutter: fluid 16px→32px, and never under a notch in landscape. */
+@utility gutter {
+  --gutter: clamp(1rem, 3vw, 2rem);
+  padding-inline:
+    max(var(--gutter), env(safe-area-inset-left))
+    max(var(--gutter), env(safe-area-inset-right));
+}
+
+/* Section rhythm: fluid 64px→128px. */
+@utility section-y {
+  padding-block: clamp(4rem, 9vw, 8rem);
+}
+
 html {
+  background-color: var(--color-bg);
   scroll-behavior: smooth;
+  /* The fixed navbar is ~68px tall; keep anchored headings clear of it. */
+  scroll-padding-top: 5.5rem;
+  /* Belt-and-braces against a stray wide child; keeps vertical scroll intact. */
+  overflow-x: clip;
+  scrollbar-gutter: stable;
 }
 
 body {
-  background-color: var(--color-bg);
-  /* Twilight ambient: soft violet/cyan/green glows for color without per-section neon */
-  background-image:
-    radial-gradient(60rem 32rem at 50% -6%, rgba(124, 58, 237, 0.30), transparent 62%),
-    radial-gradient(50rem 28rem at 100% 4%, rgba(6, 182, 212, 0.18), transparent 58%),
-    radial-gradient(46rem 26rem at 0% 24%, rgba(34, 197, 94, 0.12), transparent 60%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+ * Twilight ambient: the single page-level glow layer (DESIGN.md §4).
+ * A fixed pseudo-element rather than `background-attachment: fixed`, which
+ * iOS Safari repaints on every scroll frame. z-index -1 keeps it above the
+ * canvas colour and below every section.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(60rem 32rem at 50% -6%, rgba(124, 58, 237, 0.30), transparent 62%),
+    radial-gradient(50rem 28rem at 100% 4%, rgba(6, 182, 212, 0.18), transparent 58%),
+    radial-gradient(46rem 26rem at 0% 24%, rgba(34, 197, 94, 0.12), transparent 60%);
 }
 
 ::selection {

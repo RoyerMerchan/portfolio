@@ -11,7 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', as = 'button', href, children, ...props }, ref) => {
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/50 focus:ring-offset-2 focus:ring-offset-[var(--color-bg)]'
+      'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]'
 
     const variants = {
       primary:
@@ -24,19 +24,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'border border-white/20 text-gray-300 hover:text-white hover:border-white/40 hover:bg-white/5 active:scale-[0.98]',
     }
 
+    // min-h keeps every size at or above the 44px touch target.
     const sizes = {
-      sm: 'px-3 py-1.5 text-xs',
-      md: 'px-5 py-2.5 text-sm',
-      lg: 'px-7 py-3 text-base',
+      sm: 'px-3 py-1.5 text-xs min-h-9',
+      md: 'px-5 py-2.5 text-sm min-h-11',
+      lg: 'px-7 py-3 text-base min-h-12',
     }
 
-    if (as === 'a' && href) {
+    // An href always means a link, whether or not `as` was passed.
+    if (as === 'a' || href) {
       return (
         <a
           href={href}
           className={cn(baseStyles, variants[variant], sizes[size], className)}
-          target={href.startsWith('http') ? '_blank' : undefined}
-          rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+          target={href?.startsWith('http') ? '_blank' : undefined}
+          rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
         >
           {children}
         </a>

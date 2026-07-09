@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { socials } from '@/data/socials'
 import { getIcon } from '@/lib/icons'
 
 const contactInfo = [
@@ -36,10 +35,10 @@ const contactInfo = [
 
 export default function ContactSection() {
   return (
-    <section id="contact" className="relative py-24 sm:py-32">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+    <section id="contact" className="relative section-y">
+      <div className="max-w-4xl mx-auto gutter">
         <SectionHeader
-          title="Contacto"
+          title="Contáctame!"
           subtitle="Hablemos de tu próximo proyecto"
         />
 
@@ -50,16 +49,17 @@ export default function ContactSection() {
           transition={{ duration: 0.5 }}
           className="max-w-2xl mx-auto"
         >
-          <Card className="p-8 sm:p-10 text-center">
-            <h3 className="text-2xl font-bold text-white mb-3">
+          {/* hover={false}: the panel must not lift when you tap a link inside it */}
+          <Card hover={false} className="p-6 sm:p-8 lg:p-10 text-center">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
               Trabajemos juntos
             </h3>
-            <p className="text-gray-400 mb-8 max-w-md mx-auto">
+            <p className="text-gray-400 mb-8 max-w-md mx-auto text-pretty">
               Si tienes un proyecto en mente o necesitas un desarrollador
               fullstack para tu equipo, estoy abierto a nuevas oportunidades.
             </p>
 
-            <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 mb-8">
               {contactInfo.map((item) => {
                 const Icon = getIcon(item.iconName)
                 return (
@@ -75,7 +75,8 @@ export default function ContactSection() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs text-gray-400">{item.label}</p>
-                      <p className="text-sm font-medium text-white truncate">
+                      {/* The address IS the call to action — wrap it, never truncate it */}
+                      <p className="text-[13px] sm:text-sm font-medium text-white break-words leading-snug">
                         {item.value}
                       </p>
                     </div>
@@ -84,12 +85,8 @@ export default function ContactSection() {
               })}
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3">
-              <Button
-                as="a"
-                href="/RoyerMerchan.pdf"
-                size="lg"
-              >
+            <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-3">
+              <Button as="a" href="/RoyerMerchan.pdf" size="lg" className="w-full sm:w-auto">
                 <DownloadIcon />
                 Descargar CV
               </Button>
@@ -98,6 +95,7 @@ export default function ContactSection() {
                 size="lg"
                 as="a"
                 href="https://github.com/RoyerMerchan"
+                className="w-full sm:w-auto"
               >
                 <GithubIcon />
                 GitHub
@@ -112,10 +110,10 @@ export default function ContactSection() {
 
 function DownloadIcon() {
   const Icon = getIcon('Download')
-  return <Icon className="w-4 h-4" />
+  return <Icon className="w-4 h-4 shrink-0" />
 }
 
 function GithubIcon() {
   const Icon = getIcon('Github')
-  return <Icon className="w-4 h-4" />
+  return <Icon className="w-4 h-4 shrink-0" />
 }

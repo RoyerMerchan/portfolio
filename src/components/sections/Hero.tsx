@@ -34,8 +34,8 @@ export default function Hero() {
   }
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background: pixel-art dev illustration + legibility scrim */}
+    <section id="hero" className="relative min-h-svh flex items-center overflow-hidden">
+      {/* Background: dev illustration + legibility scrim */}
       <div className="absolute inset-0 pointer-events-none">
         <img
           src="/hero-merchan.jpg"
@@ -43,13 +43,14 @@ export default function Hero() {
           className="absolute inset-0 h-full w-full object-cover object-center"
           fetchPriority="high"
         />
-        {/* Left→right scrim keeps the headline legible over the art */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-bg)] via-[var(--color-bg)]/80 to-[var(--color-bg)]/25" />
-        {/* Top + bottom fades blend into the navbar and the next section */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)]/50 via-transparent to-[var(--color-bg)]" />
+        {/* Mobile: the headline spans the full width, so the scrim has to as well */}
+        <div className="absolute inset-0 sm:hidden bg-gradient-to-b from-[var(--color-bg)]/90 via-[var(--color-bg)]/85 to-[var(--color-bg)]" />
+        {/* sm+: text sits left, so fade left→right and let the art breathe */}
+        <div className="absolute inset-0 hidden sm:block bg-gradient-to-r from-[var(--color-bg)] via-[var(--color-bg)]/80 to-[var(--color-bg)]/25" />
+        <div className="absolute inset-0 hidden sm:block bg-gradient-to-b from-[var(--color-bg)]/50 via-transparent to-[var(--color-bg)]" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 w-full pt-32 pb-20">
+      <div className="relative max-w-7xl mx-auto gutter w-full pt-28 pb-24 sm:pt-32 sm:pb-28">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -58,14 +59,14 @@ export default function Hero() {
         >
           <motion.div variants={itemVariants} className="flex items-center gap-2 mb-6">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7C3AED]/10 border border-[#7C3AED]/20 text-[#7C3AED] text-sm font-medium">
-              <SparklesIcon className="w-4 h-4" />
+              <SparklesIcon className="w-4 h-4 shrink-0" />
               Disponible para proyectos
             </span>
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight"
+            className="text-[clamp(2.25rem,6vw,4.5rem)] font-bold text-white leading-[1.1] tracking-[-0.02em]"
           >
             Royer{' '}
             <span className="text-[var(--color-primary)]">
@@ -82,33 +83,45 @@ export default function Hero() {
 
           <motion.p
             variants={itemVariants}
-            className="mt-6 text-base sm:text-lg text-gray-400 max-w-2xl leading-relaxed"
+            className="mt-6 text-base sm:text-lg text-gray-400 max-w-2xl leading-relaxed text-pretty"
           >
             Desarrollador fullstack orientado a sistemas empresariales, APIs,
             automatización, bases de datos e infraestructura moderna.
             Construyo soluciones reales para empresas.
           </motion.p>
 
+          {/* Primary claims its own row on phones; the two supporting actions share the next */}
           <motion.div
             variants={itemVariants}
             className="flex flex-wrap gap-3 mt-8"
           >
-            <Button size="lg" onClick={() => scrollTo('projects')}>
+            <Button size="lg" className="w-full sm:w-auto" onClick={() => scrollTo('projects')}>
               Ver proyectos
-              <ArrowRightIcon className="w-4 h-4" />
+              <ArrowRightIcon className="w-4 h-4 shrink-0" />
             </Button>
-            <Button variant="outline" size="lg" onClick={() => scrollTo('contact')}>
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1 sm:flex-none px-4 sm:px-7 text-sm sm:text-base"
+              onClick={() => scrollTo('contact')}
+            >
               Contactarme
             </Button>
-            <Button variant="ghost" size="lg" href="/RoyerMerchan.pdf">
-              <DownloadIcon className="w-4 h-4" />
+            <Button
+              variant="ghost"
+              size="lg"
+              as="a"
+              href="/RoyerMerchan.pdf"
+              className="flex-1 sm:flex-none px-4 sm:px-7 text-sm sm:text-base"
+            >
+              <DownloadIcon className="w-4 h-4 shrink-0" />
               Descargar CV
             </Button>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap gap-2 mt-10"
+            className="flex flex-wrap gap-2 mt-8 sm:mt-10"
           >
             {techBadges.map((tech) => (
               <span
@@ -123,12 +136,13 @@ export default function Hero() {
 
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator — on phones the content already overflows the fold,
+          and it would land on top of the tech badges. */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 pointer-events-none"
       >
         <span className="text-xs text-gray-400">Scroll</span>
         <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1.5">

@@ -22,14 +22,14 @@ const statusLabels: Record<string, string> = {
 
 export default function ProjectsSection() {
   return (
-    <section id="projects" className="relative py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section id="projects" className="relative section-y">
+      <div className="max-w-7xl mx-auto gutter">
         <SectionHeader
           title="Proyectos Destacados"
           subtitle="Soluciones reales que he construido para resolver problemas de negocio"
         />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {projects.map((project, index) => {
             const ProjectIcon = getIcon(project.iconName)
             return (
@@ -42,7 +42,7 @@ export default function ProjectsSection() {
               >
                 <Card className="h-full flex flex-col overflow-hidden group">
                   {project.image && (
-                    <div className="relative h-48 overflow-hidden flex-shrink-0">
+                    <div className="relative h-44 sm:h-48 overflow-hidden flex-shrink-0">
                       <img
                         src={project.image}
                         alt={project.title}
@@ -52,20 +52,20 @@ export default function ProjectsSection() {
                     </div>
                   )}
 
-                  <div className={cn('p-6 flex flex-col flex-1', !project.image && 'pt-8')}>
+                  <div className={cn('p-5 sm:p-6 flex flex-col flex-1', !project.image && 'pt-7 sm:pt-8')}>
                     {!project.image && (
                       <div className="w-12 h-12 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center mb-4 group-hover:bg-[#7C3AED]/20 transition-colors duration-300">
                         <ProjectIcon className="w-6 h-6 text-[#7C3AED]" />
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="text-xs text-gray-400 font-medium uppercase tracking-wider truncate">
                         {project.type}
                       </span>
                       <span
                         className={cn(
-                          'px-2 py-0.5 rounded-full text-[10px] font-medium border',
+                          'shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap',
                           statusColors[project.status]
                         )}
                       >
@@ -99,7 +99,7 @@ export default function ProjectsSection() {
                     </div>
 
                     {project.links && project.links.length > 0 && (
-                      <div className="flex items-center gap-3 pt-3 border-t border-white/[0.06]">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-3 border-t border-white/[0.06]">
                         {project.links.map((link) => {
                           const ExternalLinkIcon = getIcon('ExternalLink')
                           return (
@@ -108,9 +108,9 @@ export default function ProjectsSection() {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 text-xs text-[#7C3AED] hover:text-[#8B5CF6] transition-colors"
+                              className="inline-flex items-center gap-1.5 py-1.5 text-xs text-[#7C3AED] hover:text-[#8B5CF6] transition-colors"
                             >
-                              <ExternalLinkIcon className="w-3.5 h-3.5" />
+                              <ExternalLinkIcon className="w-3.5 h-3.5 shrink-0" />
                               {link.label}
                             </a>
                           )

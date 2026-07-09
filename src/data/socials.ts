@@ -33,5 +33,5 @@ export const navLinks = [
   { label: 'Proyectos', href: '#projects' },
   { label: 'Experiencia', href: '#experience' },
   { label: 'Servicios', href: '#services' },
-  { label: 'Contacto', href: '#contact' },
+  { label: 'Contáctame!', href: '#contact' },
 ]

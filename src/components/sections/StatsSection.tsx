@@ -44,14 +44,15 @@ function AnimatedCounter({
 
 export default function StatsSection() {
   return (
-    <section className="relative py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section className="relative section-y">
+      <div className="max-w-7xl mx-auto gutter">
         <SectionHeader
           title="En cifras"
           subtitle="Resultados tangibles de mi trabajo en sistemas empresariales"
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+        {/* Six across only once there's room; at lg the labels wrapped to four lines. */}
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-5">
           {stats.map((stat, index) => {
             const Icon = getIcon(stat.iconName)
             return (
@@ -61,15 +62,15 @@ export default function StatsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="text-center p-6 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.06] hover:border-[#7C3AED]/20 transition-all duration-300"
+                className="text-center p-4 sm:p-6 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.06] hover:border-[#7C3AED]/20 transition-all duration-300"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center mx-auto mb-4">
+                <div className="w-10 h-10 rounded-lg bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Icon className="w-5 h-5 text-[#7C3AED]" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="text-sm text-gray-400">{stat.label}</p>
+                <p className="text-xs sm:text-sm text-gray-400 leading-snug text-balance">{stat.label}</p>
               </motion.div>
             )
           })}

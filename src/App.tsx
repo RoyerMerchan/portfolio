@@ -59,7 +59,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="flex flex-col min-h-screen bg-[var(--color-bg)]">
+      <div className="flex flex-col min-h-svh">
         <Navbar />
         <main className="flex-1">
           <ScrollToTop />

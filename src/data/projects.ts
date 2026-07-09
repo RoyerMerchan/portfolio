@@ -93,7 +93,7 @@ export const projects: Project[] = [
   {
     title: 'KnotChange — WhatsApp Clone',
     description:
-      'Clon funcional de WhatsApp con mensajería en tiempo real, lista de contactos, chats individuales e interfaz responsive.',
+      'Clon funcional de WhatsApp con mensajería en tiempo real, lista de Contáctame!s, chats individuales e interfaz responsive.',
     problem:
       'Proyecto personal para explorar sistemas de mensajería en tiempo real con WebSockets y UX de apps de mensajería.',
     techs: ['React', 'Node.js', 'Express', 'Socket.IO', 'MongoDB'],

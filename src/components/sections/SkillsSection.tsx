@@ -17,14 +17,14 @@ const groupColors: Record<string, string> = {
 
 export default function SkillsSection() {
   return (
-    <section id="skills" className="relative py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section id="skills" className="relative section-y">
+      <div className="max-w-7xl mx-auto gutter">
         <SectionHeader
           title="Stack Tecnológico"
           subtitle="Tecnologías y herramientas con las que construyo soluciones empresariales"
         />
 
-        <div className="space-y-16">
+        <div className="space-y-12 sm:space-y-16">
           {skillGroups.map((group, groupIndex) => {
             const GroupIcon = getIcon(group.iconName)
             return (
@@ -35,22 +35,23 @@ export default function SkillsSection() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, delay: groupIndex * 0.1 }}
               >
-                <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-3 mb-6 sm:mb-8">
                   <div
                     className={cn(
-                      'w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br',
+                      'w-10 h-10 shrink-0 rounded-xl flex items-center justify-center bg-gradient-to-br',
                       groupColors[group.title] || 'from-[#7C3AED] to-[#8B5CF6]'
                     )}
                   >
                     <GroupIcon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white">
+                  <h3 className="text-lg sm:text-xl font-semibold text-white min-w-0">
                     {group.title}
                   </h3>
-                  <div className="h-px flex-1 bg-gradient-to-r from-white/[0.1] to-transparent" />
+                  {/* Nothing left to rule off once the title wraps */}
+                  <div className="hidden sm:block h-px flex-1 bg-gradient-to-r from-white/[0.1] to-transparent" />
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                   {group.skills.map((skill, skillIndex) => {
                     const SkillIcon = getIcon(skill.iconName)
                     return (
@@ -64,11 +65,11 @@ export default function SkillsSection() {
                         className="group relative"
                       >
                         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/[0.04] to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="relative flex flex-col items-center gap-3 p-5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-[#7C3AED]/30 transition-all duration-300">
-                          <div className="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center group-hover:bg-[#7C3AED]/10 transition-colors duration-300">
+                        <div className="relative h-full flex flex-col items-center gap-3 p-4 sm:p-5 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:border-[#7C3AED]/30 transition-all duration-300">
+                          <div className="w-10 h-10 shrink-0 rounded-lg bg-white/[0.06] flex items-center justify-center group-hover:bg-[#7C3AED]/10 transition-colors duration-300">
                             <SkillIcon className="w-5 h-5 text-gray-400 group-hover:text-[#7C3AED] transition-colors duration-300" />
                           </div>
-                          <span className="text-sm font-medium text-gray-400 group-hover:text-white text-center transition-colors duration-300">
+                          <span className="text-xs sm:text-sm font-medium text-gray-400 group-hover:text-white text-center leading-snug break-words transition-colors duration-300">
                             {skill.name}
                           </span>
                         </div>
