@@ -82,12 +82,18 @@ function getStoredWallpaper(): WallpaperId {
   return wallpapers.some((item) => item.id === stored) ? stored! : 'grid'
 }
 
+function getStoredTaskbarState() {
+  if (typeof window === 'undefined') return false
+  return window.localStorage.getItem('royeros-taskbar-collapsed') === 'true'
+}
+
 export default function RoyerOS() {
   const [systemState, setSystemState] = useState<SystemState>('booting')
   const [wallpaper, setWallpaper] = useState<WallpaperId>(getStoredWallpaper)
   const [startOpen, setStartOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null)
   const [refreshPulse, setRefreshPulse] = useState(false)
+  const [taskbarCollapsed, setTaskbarCollapsed] = useState(getStoredTaskbarState)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const prefersReducedMotion = useReducedMotion()
   const isMobile = useMediaQuery('(max-width: 760px)')
@@ -102,6 +108,10 @@ export default function RoyerOS() {
   }, [])
 
   const openExternal = useCallback((url: string) => {
+    if (url.startsWith('mailto:') || url.startsWith('tel:')) {
+      window.location.href = url
+      return
+    }
     window.open(url, '_blank', 'noopener,noreferrer')
   }, [])
 
@@ -152,6 +162,15 @@ export default function RoyerOS() {
   const restart = useCallback(() => {
     setSystemState('booting')
     window.localStorage.removeItem('royeros-has-booted')
+  }, [])
+
+  const toggleTaskbar = useCallback(() => {
+    setTaskbarCollapsed((current) => {
+      const next = !current
+      window.localStorage.setItem('royeros-taskbar-collapsed', String(next))
+      return next
+    })
+    setStartOpen(false)
   }, [])
 
   useEffect(() => {
@@ -225,6 +244,7 @@ export default function RoyerOS() {
             key={item.id}
             item={item}
             isMobile={isMobile}
+            taskbarCollapsed={taskbarCollapsed}
             focusWindow={manager.focusWindow}
             closeWindow={manager.closeWindow}
             minimizeWindow={manager.minimizeWindow}
@@ -273,6 +293,8 @@ export default function RoyerOS() {
           openApp={openApp}
           openExternal={openExternal}
           restoreWindow={manager.restoreWindow}
+          collapsed={taskbarCollapsed}
+          onToggleCollapse={toggleTaskbar}
         />
       )}
 
@@ -547,6 +569,7 @@ function DesktopIcon({
 function WindowFrame({
   item,
   isMobile,
+  taskbarCollapsed,
   children,
   focusWindow,
   closeWindow,
@@ -556,6 +579,7 @@ function WindowFrame({
 }: {
   item: RoyerWindow
   isMobile: boolean
+  taskbarCollapsed: boolean
   children: React.ReactNode
   focusWindow: (windowId: string) => void
   closeWindow: (windowId: string) => void
@@ -595,7 +619,11 @@ function WindowFrame({
   const fixedStyle = isMobile
     ? { inset: 0, width: 'auto', height: 'auto' }
     : item.maximized
-      ? { inset: '14px 14px 86px', width: 'auto', height: 'auto' }
+      ? {
+          inset: taskbarCollapsed ? '14px' : '14px 14px 86px',
+          width: 'auto',
+          height: 'auto',
+        }
       : {
           left: item.position.x,
           top: item.position.y,
@@ -884,20 +912,22 @@ function ProjectsApp({ openProject }: { openProject: (projectId: string) => void
 }
 
 function ProjectIcon({ projectId }: { projectId: string }) {
-  const iconName =
-    projectId === 'torneo-system'
-      ? 'Trophy'
-      : projectId === 'colegio-system'
-        ? 'School'
-        : projectId === 'canvas-game'
-          ? 'Gamepad2'
-          : projectId === 'knotchange'
-            ? 'MessageCircle'
-            : projectId === 'portfolio-experiments'
-              ? 'Monitor'
-              : 'FolderOpen'
+  const projectIcons: Record<string, string> = {
+    'torneo-system': 'Trophy',
+    'colegio-system': 'School',
+    'finanzas-ve': 'WalletCards',
+    'gochito-system': 'ShoppingCart',
+    omstore: 'Store',
+    'emily-portfolio': 'BookOpen',
+    'invsystem-pro': 'Boxes',
+    'restaurant-system': 'UtensilsCrossed',
+    spotibad: 'Music2',
+    'canvas-game': 'Gamepad2',
+    knotchange: 'MessageCircle',
+    'portfolio-experiments': 'Monitor',
+  }
 
-  return <Icon name={iconName} className="size-5" />
+  return <Icon name={projectIcons[projectId] ?? 'FolderOpen'} className="size-5" />
 }
 
 function ProjectCaseApp({
@@ -971,31 +1001,33 @@ function ProjectCaseApp({
         </section>
       </div>
 
-      <section className="mt-5 rounded-2xl border border-white/10 bg-white/[0.045] p-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="text-lg font-black tracking-normal">Screenshots and assets</h3>
-          <p className="text-xs text-zinc-500">Real project files used when available</p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {project.screenshots.map((screenshot) => (
-            <figure
-              key={`${project.id}-${screenshot.src}`}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60"
-            >
-              <img
-                src={screenshot.src}
-                alt={screenshot.title}
-                className="aspect-video w-full object-cover"
-                loading="lazy"
-              />
-              <figcaption className="space-y-1 p-3">
-                <p className="text-sm font-bold">{screenshot.title}</p>
-                <p className="text-xs leading-5 text-zinc-400">{screenshot.caption}</p>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
+      {project.screenshots.length > 0 && (
+        <section className="mt-5 rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-black tracking-normal">Screenshots and assets</h3>
+            <p className="text-xs text-zinc-500">Real project files used when available</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {project.screenshots.map((screenshot) => (
+              <figure
+                key={`${project.id}-${screenshot.src}`}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60"
+              >
+                <img
+                  src={screenshot.src}
+                  alt={screenshot.title}
+                  className="aspect-video w-full object-cover"
+                  loading="lazy"
+                />
+                <figcaption className="space-y-1 p-3">
+                  <p className="text-sm font-bold">{screenshot.title}</p>
+                  <p className="text-xs leading-5 text-zinc-400">{screenshot.caption}</p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="mt-5 flex flex-wrap gap-3">
         {project.github && (
@@ -1014,12 +1046,18 @@ function ProjectCaseApp({
 }
 
 function ProjectPreview({ project }: { project: ProjectCase }) {
-  const stats =
-    project.id === 'colegio-system'
-      ? ['65 models', '25 permission modules', 'PDF / Excel']
-      : project.id === 'torneo-system'
-        ? ['Live score', 'Prisma schema', 'Socket.IO']
-        : ['Responsive UI', 'Typed flow', 'Clean modules']
+  const projectStats: Record<string, string[]> = {
+    'colegio-system': ['65 models', '25 permission modules', 'PDF / Excel'],
+    'torneo-system': ['Live score', 'Prisma schema', 'Socket.IO'],
+    'finanzas-ve': ['28 tables', '147 tests', 'Offline sync'],
+    'gochito-system': ['Dual currency', 'POS realtime', 'PDF / Excel'],
+    omstore: ['POS + cash', 'Stock ledger', 'Layaways'],
+    'emily-portfolio': ['Page folding', 'Touch gestures', 'Next.js 15'],
+    'invsystem-pro': ['3 forecast models', 'FastAPI', 'Redis cache'],
+    'restaurant-system': ['REST API', 'Kitchen realtime', 'MySQL'],
+    spotibad: ['Spotify API', 'JWT auth', 'Playlists'],
+  }
+  const stats = projectStats[project.id] ?? ['Responsive UI', 'Typed flow', 'Clean modules']
 
   return (
     <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-4">
@@ -1191,7 +1229,9 @@ function TerminalApp({
         writeOutput([
           'help, whoami, about, projects, skills, contact',
           'github, linkedin, resume, date, neofetch, ls, clear',
-          'open sportapp | open torneo | open colegio | open knotchange',
+          'open torneo | colegio | finanzas | gochito | omstore',
+          'open inventario | restaurante | spotibad | emily',
+          'open sportapp | knotchange | canvas',
           'easter egg: sudo hire royer',
         ])
         return
@@ -1275,6 +1315,21 @@ function TerminalApp({
           colegio: 'colegio-system',
           golegio: 'colegio-system',
           school: 'colegio-system',
+          finanzas: 'finanzas-ve',
+          finance: 'finanzas-ve',
+          appcrash: 'finanzas-ve',
+          gochito: 'gochito-system',
+          gochitosystem: 'gochito-system',
+          omstore: 'omstore',
+          emily: 'emily-portfolio',
+          'emily-portfolio': 'emily-portfolio',
+          inventario: 'invsystem-pro',
+          invsystem: 'invsystem-pro',
+          'invsystem-pro': 'invsystem-pro',
+          restaurante: 'restaurant-system',
+          restaurant: 'restaurant-system',
+          spotibad: 'spotibad',
+          spotify: 'spotibad',
           knotchange: 'knotchange',
           canvas: 'canvas-game',
           portfolio: 'portfolio-experiments',
@@ -1355,8 +1410,18 @@ function ContactApp({
 }) {
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    event.currentTarget.reset()
-    notify('Message sent successfully', 'Thanks. RoyerOS logged your intent to connect.')
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const name = String(data.get('name') ?? '').trim()
+    const senderEmail = String(data.get('email') ?? '').trim()
+    const message = String(data.get('message') ?? '').trim()
+    const subject = encodeURIComponent(`Portfolio contact from ${name}`)
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${senderEmail}\n\nMessage:\n${message}`,
+    )
+
+    openExternal(`mailto:${profile.email}?subject=${subject}&body=${body}`)
+    notify('Email draft opened', 'Review the message in your email app and press Send.')
   }
 
   return (
@@ -1393,7 +1458,7 @@ function ContactApp({
         <ContactLink icon="Github" label="GitHub" value="RoyerMerchan" onClick={() => openExternal(profile.github)} />
         <ContactLink icon="Linkedin" label="LinkedIn" value="Royer Merchan" onClick={() => openExternal(profile.linkedin)} />
         <ContactLink icon="Mail" label="Email" value={profile.email} onClick={() => openExternal(`mailto:${profile.email}`)} />
-        <ContactLink icon="MessageCircle" label="WhatsApp" value="Direct message" onClick={() => openExternal(profile.whatsapp)} />
+        <ContactLink icon="MessageCircle" label="WhatsApp" value={profile.phone} onClick={() => openExternal(profile.whatsapp)} />
       </aside>
     </div>
   )
@@ -1644,6 +1709,8 @@ function Taskbar({
   openApp,
   openExternal,
   restoreWindow,
+  collapsed,
+  onToggleCollapse,
 }: {
   windows: RoyerWindow[]
   startOpen: boolean
@@ -1651,14 +1718,37 @@ function Taskbar({
   openApp: (appId: AppId) => void
   openExternal: (url: string) => void
   restoreWindow: (windowId: string) => void
+  collapsed: boolean
+  onToggleCollapse: () => void
 }) {
   const now = useClock()
   const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const date = now.toLocaleDateString([], { month: 'short', day: 'numeric' })
 
+  if (collapsed) {
+    return (
+      <footer className="pointer-events-none fixed bottom-3 right-3 z-[120]">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleCollapse()
+          }}
+          className="pointer-events-auto grid size-11 place-items-center rounded-xl border border-white/12 bg-zinc-950/88 text-zinc-200 shadow-[0_6px_8px_rgba(0,0,0,0.36)] transition hover:bg-zinc-900 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
+          title="Expand taskbar"
+          aria-label="Expand taskbar"
+        >
+          <Icon name="ChevronUp" className="size-5" />
+        </button>
+      </footer>
+    )
+  }
+
   return (
     <footer className="fixed inset-x-0 bottom-0 z-[120] flex justify-center px-3 pb-3 pointer-events-none">
-      <div className="pointer-events-auto flex h-16 w-full max-w-5xl items-center gap-2 overflow-x-auto rounded-2xl border border-white/12 bg-zinc-950/76 px-3 shadow-[0_14px_40px_rgba(0,0,0,0.38)] backdrop-blur-2xl">
+      <div
+        className="pointer-events-auto flex h-16 w-full max-w-5xl items-center gap-2 overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/76 px-3 shadow-[0_14px_40px_rgba(0,0,0,0.38)] backdrop-blur-2xl"
+      >
         <button
           type="button"
           onClick={(event) => {
@@ -1679,7 +1769,7 @@ function Taskbar({
 
         <div className="mx-1 h-8 w-px shrink-0 bg-white/10" />
 
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
           {windows.map((item) => (
             <button
               key={item.id}
@@ -1704,6 +1794,11 @@ function Taskbar({
           <p className="text-sm font-bold text-white">{time}</p>
           <p className="text-[11px] text-zinc-500">{date}</p>
         </div>
+        <TaskbarButton
+          icon="ChevronDown"
+          label="Collapse taskbar"
+          onClick={onToggleCollapse}
+        />
       </div>
     </footer>
   )
