@@ -44,6 +44,7 @@ textarea {
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 #root {
@@ -100,6 +101,39 @@ button {
     #090909;
 }
 
+.mobile-home {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(52, 211, 153, 0.17), transparent 30%),
+    radial-gradient(circle at 8% 58%, rgba(103, 232, 249, 0.14), transparent 34%),
+    #07100f;
+  overscroll-behavior: none;
+}
+
+.mobile-status-bar {
+  min-height: calc(2.25rem + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+}
+
+.mobile-dock {
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  background: rgba(8, 12, 12, 0.88);
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.28);
+}
+
+.mobile-window {
+  height: 100dvh;
+  contain: paint;
+  overscroll-behavior: none;
+}
+
+.mobile-app-header {
+  min-height: calc(3.75rem + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  background: #090d0d;
+}
+
 ::selection {
   color: #020617;
   background: #67e8f9;
@@ -128,9 +162,17 @@ button {
 }
 
 @media (max-width: 760px) {
+  .royer-os::before {
+    background: #07100f;
+  }
+
   .royer-os::after {
-    opacity: 0.18;
-    background-size: 28px 28px;
+    display: none;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
   }
 }
 

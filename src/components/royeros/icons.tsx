@@ -1,9 +1,11 @@
 import type { ComponentProps } from 'react'
 import {
   Activity,
+  BatteryMedium,
   Bell,
   BriefcaseBusiness,
   ChevronRight,
+  ChevronLeft,
   Circle,
   Code2,
   Contact,
@@ -47,9 +49,11 @@ import type { LucideIcon } from 'lucide-react'
 
 export const iconMap = {
   Activity,
+  BatteryMedium,
   Bell,
   BriefcaseBusiness,
   ChevronRight,
+  ChevronLeft,
   Circle,
   Code2,
   Contact,

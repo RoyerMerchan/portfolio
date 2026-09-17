@@ -61,7 +61,9 @@ function useClock() {
 }
 
 function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false)
+  const [matches, setMatches] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia(query).matches,
+  )
 
   useEffect(() => {
     const media = window.matchMedia(query)
@@ -106,11 +108,10 @@ export default function RoyerOS() {
   const openApp = useCallback(
     (appId: AppId) => {
       manager.openApp(appId)
-      notify('RoyerOS', `${appTitles[appId]} opened successfully.`)
       setStartOpen(false)
       setContextMenu(null)
     },
-    [manager, notify],
+    [manager],
   )
 
   const openProject = useCallback(
@@ -118,11 +119,10 @@ export default function RoyerOS() {
       const project = findProject(projectId)
       if (!project) return
       manager.openProject(project.id, project.name)
-      notify('Project opened', `${project.name} case study is ready.`)
       setStartOpen(false)
       setContextMenu(null)
     },
-    [manager, notify],
+    [manager],
   )
 
   const cycleWallpaper = useCallback(() => {
@@ -157,16 +157,18 @@ export default function RoyerOS() {
   useEffect(() => {
     if (systemState !== 'booting') return
     const hasBooted = window.localStorage.getItem('royeros-has-booted') === 'true'
-    const delay = hasBooted || prefersReducedMotion ? 650 : 2500
+    const delay = hasBooted || prefersReducedMotion ? 180 : 1100
 
     const timer = window.setTimeout(() => {
       window.localStorage.setItem('royeros-has-booted', 'true')
       setSystemState('desktop')
-      notify('Welcome to RoyerOS', 'Explore my work, skills and experiments.')
+      if (!isMobile) {
+        notify('Welcome to RoyerOS', 'Explore my work, skills and experiments.')
+      }
     }, delay)
 
     return () => window.clearTimeout(timer)
-  }, [notify, prefersReducedMotion, systemState])
+  }, [isMobile, notify, prefersReducedMotion, systemState])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -201,16 +203,21 @@ export default function RoyerOS() {
         setStartOpen(false)
       }}
       onContextMenu={(event) => {
+        if (isMobile) return
         event.preventDefault()
         setStartOpen(false)
         setContextMenu({ x: event.clientX, y: event.clientY })
       }}
     >
-      <DesktopLayer
-        refreshPulse={refreshPulse}
-        openApp={openApp}
-        openExternal={openExternal}
-      />
+      {isMobile ? (
+        <MobileHome openApp={openApp} openExternal={openExternal} />
+      ) : (
+        <DesktopLayer
+          refreshPulse={refreshPulse}
+          openApp={openApp}
+          openExternal={openExternal}
+        />
+      )}
 
       <AnimatePresence>
         {manager.visibleWindows.map((item) => (
@@ -258,14 +265,16 @@ export default function RoyerOS() {
         )}
       </AnimatePresence>
 
-      <Taskbar
-        windows={manager.windows}
-        startOpen={startOpen}
-        setStartOpen={setStartOpen}
-        openApp={openApp}
-        openExternal={openExternal}
-        restoreWindow={manager.restoreWindow}
-      />
+      {!isMobile && (
+        <Taskbar
+          windows={manager.windows}
+          startOpen={startOpen}
+          setStartOpen={setStartOpen}
+          openApp={openApp}
+          openExternal={openExternal}
+          restoreWindow={manager.restoreWindow}
+        />
+      )}
 
       <NotificationStack notifications={notifications} />
     </div>
@@ -336,6 +345,137 @@ function ShutdownScreen({ onRestart }: { onRestart: () => void }) {
   )
 }
 
+function MobileHome({
+  openApp,
+  openExternal,
+}: {
+  openApp: (appId: AppId) => void
+  openExternal: (url: string) => void
+}) {
+  const now = useClock()
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+  const launchShortcut = (shortcut: (typeof shortcuts)[number]) => {
+    if (shortcut.kind === 'external' && shortcut.externalUrl) {
+      openExternal(shortcut.externalUrl)
+      return
+    }
+    if (shortcut.appId) openApp(shortcut.appId)
+  }
+
+  return (
+    <main className="mobile-home absolute inset-0 flex flex-col overflow-hidden text-white">
+      <div className="mobile-status-bar flex shrink-0 items-center justify-between px-5 text-xs font-bold">
+        <span>{time}</span>
+        <div className="flex items-center gap-2" aria-label="Connection and battery status">
+          <Icon name="Wifi" className="size-4" />
+          <Icon name="BatteryMedium" className="size-5" />
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-28 pt-3">
+        <header className="mb-8 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-cyan-100">RoyerOS Mobile</p>
+            <h1 className="mt-1 text-2xl font-black tracking-normal">Hola, soy Royer.</h1>
+          </div>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              openApp('about')
+            }}
+            className="grid size-12 place-items-center rounded-2xl bg-cyan-300 text-base font-black text-zinc-950 shadow-[0_6px_8px_rgba(0,0,0,0.28)] active:scale-95"
+            aria-label="Open profile"
+          >
+            RM
+          </button>
+        </header>
+
+        <section className="mb-8 border-y border-white/12 py-5">
+          <p className="max-w-[28rem] text-xl font-bold leading-7 text-white">
+            Full Stack Developer enfocado en sistemas reales, APIs e interfaces claras.
+          </p>
+          <div className="mt-4 flex items-center gap-2 text-sm text-emerald-200">
+            <span className="size-2 rounded-full bg-emerald-300" />
+            Disponible para nuevos proyectos
+          </div>
+        </section>
+
+        <section aria-label="Applications">
+          <div className="grid grid-cols-4 gap-x-3 gap-y-6">
+            {shortcuts.map((shortcut) => (
+              <button
+                key={shortcut.id}
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  launchShortcut(shortcut)
+                }}
+                className="group flex min-w-0 flex-col items-center gap-2 text-center outline-none active:scale-95"
+              >
+                <span
+                  className={`grid size-14 place-items-center rounded-2xl shadow-[0_6px_8px_rgba(0,0,0,0.28)] ${mobileAppTone(shortcut.id)}`}
+                >
+                  <Icon name={shortcut.iconName} className="size-6" />
+                </span>
+                <span className="w-full truncate text-[11px] font-semibold text-white">
+                  {shortcut.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <nav className="mobile-dock absolute inset-x-4 bottom-3 flex h-[72px] items-center justify-around px-3" aria-label="Favorite apps">
+        <MobileDockButton icon="UserRound" label="About" onClick={() => openApp('about')} />
+        <MobileDockButton icon="FolderKanban" label="Projects" onClick={() => openApp('projects')} />
+        <MobileDockButton icon="Mail" label="Contact" onClick={() => openApp('contact')} />
+        <MobileDockButton icon="Github" label="GitHub" onClick={() => openExternal(profile.github)} />
+      </nav>
+    </main>
+  )
+}
+
+function mobileAppTone(shortcutId: string) {
+  const tones: Record<string, string> = {
+    about: 'bg-cyan-300 text-zinc-950',
+    projects: 'bg-emerald-300 text-zinc-950',
+    skills: 'bg-violet-400 text-white',
+    terminal: 'bg-zinc-900 text-cyan-200 ring-1 ring-white/15',
+    contact: 'bg-blue-500 text-white',
+    resume: 'bg-amber-300 text-zinc-950',
+    github: 'bg-white text-zinc-950',
+    trash: 'bg-zinc-700 text-zinc-100',
+  }
+  return tones[shortcutId] ?? 'bg-zinc-800 text-white'
+}
+
+function MobileDockButton({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: string
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick()
+      }}
+      className="grid size-12 place-items-center rounded-2xl bg-white/10 text-white outline-none transition active:scale-95 active:bg-white/20"
+      aria-label={label}
+    >
+      <Icon name={icon} className="size-5" />
+    </button>
+  )
+}
+
 function DesktopLayer({
   refreshPulse,
   openApp,
@@ -387,13 +527,9 @@ function DesktopIcon({
   return (
     <button
       type="button"
-      onDoubleClick={(event) => {
-        event.stopPropagation()
-        onOpen()
-      }}
       onClick={(event) => {
         event.stopPropagation()
-        if (window.matchMedia('(max-width: 760px)').matches) onOpen()
+        onOpen()
       }}
       className="group flex w-[88px] flex-col items-center gap-2 rounded-xl p-2 text-center outline-none transition hover:bg-white/10 focus-visible:bg-white/12 focus-visible:ring-2 focus-visible:ring-cyan-300/60"
       title={`Open ${label}`}
@@ -469,62 +605,87 @@ function WindowFrame({
 
   return (
     <motion.section
-      className="fixed flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 text-white shadow-[0_20px_44px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:rounded-2xl"
+      className={
+        isMobile
+          ? 'mobile-window fixed flex min-h-0 flex-col overflow-hidden bg-zinc-950 text-white'
+          : 'fixed flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 text-white shadow-[0_20px_44px_rgba(0,0,0,0.45)] backdrop-blur-2xl'
+      }
       style={{ ...fixedStyle, zIndex: item.zIndex }}
-      initial={{ opacity: 0, scale: 0.96, y: 16 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.96, y: 18 }}
-      transition={{ duration: 0.18, ease: 'easeOut' }}
+      initial={isMobile ? { opacity: 0, x: 18 } : { opacity: 0, scale: 0.98, y: 10 }}
+      animate={isMobile ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1, y: 0 }}
+      exit={isMobile ? { opacity: 0, x: 18 } : { opacity: 0, scale: 0.98, y: 10 }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       onMouseDown={() => focusWindow(item.id)}
       role="dialog"
       aria-label={item.title}
     >
-      <div
-        className={`flex h-11 shrink-0 items-center justify-between border-b border-white/10 bg-white/[0.045] px-3 ${
-          canDrag ? 'cursor-grab active:cursor-grabbing' : ''
-        }`}
-        onPointerDown={handlePointerDown}
-      >
-        <div className="flex min-w-0 items-center gap-2">
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation()
-                closeWindow(item.id)
-              }}
-              className="grid size-3.5 place-items-center rounded-full bg-red-400/90 text-transparent outline-none transition hover:text-red-950 focus-visible:ring-2 focus-visible:ring-red-200"
-              aria-label="Close window"
-            >
-              <Icon name="X" className="size-2.5" />
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation()
-                minimizeWindow(item.id)
-              }}
-              className="grid size-3.5 place-items-center rounded-full bg-amber-300/90 text-transparent outline-none transition hover:text-amber-950 focus-visible:ring-2 focus-visible:ring-amber-100"
-              aria-label="Minimize window"
-            >
-              <Icon name="Minus" className="size-2.5" />
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation()
-                toggleMaximize(item.id)
-              }}
-              className="grid size-3.5 place-items-center rounded-full bg-emerald-400/90 text-transparent outline-none transition hover:text-emerald-950 focus-visible:ring-2 focus-visible:ring-emerald-100"
-              aria-label="Maximize window"
-            >
-              <Icon name={item.maximized ? 'Minimize2' : 'Maximize2'} className="size-2.5" />
-            </button>
-          </div>
-          <p className="truncate pl-2 text-xs font-semibold text-zinc-300">{item.title}</p>
+      {isMobile ? (
+        <div className="mobile-app-header relative flex shrink-0 items-end justify-between border-b border-white/10 px-2 pb-2">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              closeWindow(item.id)
+            }}
+            className="flex min-h-11 min-w-11 items-center gap-1 rounded-xl px-2 text-sm font-semibold text-cyan-200 transition active:bg-white/10"
+            aria-label={`Close ${item.title}`}
+          >
+            <Icon name="ChevronLeft" className="size-5" />
+            Atrás
+          </button>
+          <p className="pointer-events-none absolute inset-x-20 bottom-5 truncate text-center text-sm font-bold text-white">
+            {item.title}
+          </p>
+          <span className="size-11" aria-hidden="true" />
         </div>
-        <p className="hidden font-mono text-[10px] text-zinc-500 sm:block">RoyerOS</p>
-      </div>
+      ) : (
+        <div
+          className={`flex h-11 shrink-0 items-center justify-between border-b border-white/10 bg-white/[0.045] px-3 ${
+            canDrag ? 'cursor-grab active:cursor-grabbing' : ''
+          }`}
+          onPointerDown={handlePointerDown}
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  closeWindow(item.id)
+                }}
+                className="grid size-3.5 place-items-center rounded-full bg-red-400/90 text-transparent outline-none transition hover:text-red-950 focus-visible:ring-2 focus-visible:ring-red-200"
+                aria-label="Close window"
+              >
+                <Icon name="X" className="size-2.5" />
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  minimizeWindow(item.id)
+                }}
+                className="grid size-3.5 place-items-center rounded-full bg-amber-300/90 text-transparent outline-none transition hover:text-amber-950 focus-visible:ring-2 focus-visible:ring-amber-100"
+                aria-label="Minimize window"
+              >
+                <Icon name="Minus" className="size-2.5" />
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  toggleMaximize(item.id)
+                }}
+                className="grid size-3.5 place-items-center rounded-full bg-emerald-400/90 text-transparent outline-none transition hover:text-emerald-950 focus-visible:ring-2 focus-visible:ring-emerald-100"
+                aria-label="Maximize window"
+              >
+                <Icon name={item.maximized ? 'Minimize2' : 'Maximize2'} className="size-2.5" />
+              </button>
+            </div>
+            <p className="truncate pl-2 text-xs font-semibold text-zinc-300">{item.title}</p>
+          </div>
+          <p className="font-mono text-[10px] text-zinc-500">RoyerOS</p>
+        </div>
+      )}
       <div className="min-h-0 flex-1 overflow-auto">{children}</div>
     </motion.section>
   )
@@ -684,7 +845,7 @@ function ProjectsApp({ openProject }: { openProject: (projectId: string) => void
           <div>
             <h2 className="text-2xl font-black tracking-normal">Project File Explorer</h2>
             <p className="mt-1 text-sm text-zinc-400">
-              Double click a folder to open its case study.
+              Select a project to open its case study.
             </p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.045] px-3 py-2 font-mono text-xs text-zinc-400">
@@ -696,10 +857,7 @@ function ProjectsApp({ openProject }: { openProject: (projectId: string) => void
             <button
               key={project.id}
               type="button"
-              onDoubleClick={() => openProject(project.id)}
-              onClick={() => {
-                if (window.matchMedia('(max-width: 760px)').matches) openProject(project.id)
-              }}
+              onClick={() => openProject(project.id)}
               className="group min-h-[168px] rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-left outline-none transition hover:border-cyan-200/35 hover:bg-white/8 focus-visible:ring-2 focus-visible:ring-cyan-300/60"
             >
               <div className="mb-4 flex items-start justify-between gap-3">

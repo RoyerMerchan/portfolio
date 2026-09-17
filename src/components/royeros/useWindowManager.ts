@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { appTitles, type AppId } from '@/data/royeros'
 
 export type WindowKind = 'app' | 'project'
@@ -42,15 +42,11 @@ function nextPosition(index: number) {
 
 export function useWindowManager() {
   const [windows, setWindows] = useState<RoyerWindow[]>([])
-  const [zCursor, setZCursor] = useState(40)
+  const zCursor = useRef(40)
 
   const bumpZ = useCallback(() => {
-    let next = 0
-    setZCursor((current) => {
-      next = current + 1
-      return next
-    })
-    return next
+    zCursor.current += 1
+    return zCursor.current
   }, [])
 
   const focusWindow = useCallback(
@@ -67,60 +63,64 @@ export function useWindowManager() {
 
   const openApp = useCallback(
     (appId: AppId) => {
-      const existing = windows.find((item) => item.id === appId)
-      if (existing) {
-        focusWindow(existing.id)
-        return existing.id
-      }
-
       const nextZ = bumpZ()
-      const createdIndex = windows.length
-      const newWindow: RoyerWindow = {
-        id: appId,
-        appId,
-        kind: 'app',
-        title: appTitles[appId],
-        minimized: false,
-        maximized: false,
-        zIndex: nextZ,
-        position: nextPosition(createdIndex),
-        size: defaultSizes[appId],
-      }
+      setWindows((current) => {
+        const existing = current.find((item) => item.id === appId)
+        if (existing) {
+          return current.map((item) =>
+            item.id === appId ? { ...item, zIndex: nextZ, minimized: false } : item,
+          )
+        }
 
-      setWindows((current) => [...current, newWindow])
-      return newWindow.id
+        const newWindow: RoyerWindow = {
+          id: appId,
+          appId,
+          kind: 'app',
+          title: appTitles[appId],
+          minimized: false,
+          maximized: false,
+          zIndex: nextZ,
+          position: nextPosition(current.length),
+          size: defaultSizes[appId],
+        }
+
+        return [...current, newWindow]
+      })
+      return appId
     },
-    [bumpZ, focusWindow, windows],
+    [bumpZ],
   )
 
   const openProject = useCallback(
     (projectId: string, projectName: string) => {
       const windowId = `project-${projectId}`
-      const existing = windows.find((item) => item.id === windowId)
-      if (existing) {
-        focusWindow(existing.id)
-        return existing.id
-      }
-
       const nextZ = bumpZ()
-      const createdIndex = windows.length
-      const newWindow: RoyerWindow = {
-        id: windowId,
-        appId: 'project',
-        kind: 'project',
-        title: `${projectName}.case`,
-        projectId,
-        minimized: false,
-        maximized: false,
-        zIndex: nextZ,
-        position: nextPosition(createdIndex),
-        size: defaultSizes.project,
-      }
+      setWindows((current) => {
+        const existing = current.find((item) => item.id === windowId)
+        if (existing) {
+          return current.map((item) =>
+            item.id === windowId ? { ...item, zIndex: nextZ, minimized: false } : item,
+          )
+        }
 
-      setWindows((current) => [...current, newWindow])
-      return newWindow.id
+        const newWindow: RoyerWindow = {
+          id: windowId,
+          appId: 'project',
+          kind: 'project',
+          title: `${projectName}.case`,
+          projectId,
+          minimized: false,
+          maximized: false,
+          zIndex: nextZ,
+          position: nextPosition(current.length),
+          size: defaultSizes.project,
+        }
+
+        return [...current, newWindow]
+      })
+      return windowId
     },
-    [bumpZ, focusWindow, windows],
+    [bumpZ],
   )
 
   const closeWindow = useCallback((windowId: string) => {
