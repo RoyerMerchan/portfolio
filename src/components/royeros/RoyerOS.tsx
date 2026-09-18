@@ -49,6 +49,41 @@ const categories: { id: 'all' | ProjectCategory; label: string }[] = [
   { id: 'experiment', label: 'Experiments' },
 ]
 
+const projectIcons: Record<string, string> = {
+  sportapp: 'Trophy',
+  'torneo-system': 'Trophy',
+  'colegio-system': 'School',
+  'finanzas-ve': 'WalletCards',
+  'gochito-system': 'ShoppingCart',
+  omstore: 'Store',
+  'emily-portfolio': 'BookOpen',
+  'invsystem-pro': 'Boxes',
+  'restaurant-system': 'UtensilsCrossed',
+  spotibad: 'Music2',
+  'canvas-game': 'Gamepad2',
+  knotchange: 'MessageCircle',
+  'portfolio-experiments': 'Monitor',
+}
+
+const installedProjectIds = new Set([
+  'torneo-system',
+  'colegio-system',
+  'finanzas-ve',
+  'gochito-system',
+  'omstore',
+  'emily-portfolio',
+])
+
+const installedProjects = projects.filter((project) => installedProjectIds.has(project.id))
+
+function getProjectIconName(projectId: string) {
+  return projectIcons[projectId] ?? 'FolderOpen'
+}
+
+function getProjectCover(project: ProjectCase) {
+  return project.screenshots[0]?.src
+}
+
 function useClock() {
   const [now, setNow] = useState(() => new Date())
 
@@ -229,11 +264,16 @@ export default function RoyerOS() {
       }}
     >
       {isMobile ? (
-        <MobileHome openApp={openApp} openExternal={openExternal} />
+        <MobileHome
+          openApp={openApp}
+          openProject={openProject}
+          openExternal={openExternal}
+        />
       ) : (
         <DesktopLayer
           refreshPulse={refreshPulse}
           openApp={openApp}
+          openProject={openProject}
           openExternal={openExternal}
         />
       )}
@@ -369,9 +409,11 @@ function ShutdownScreen({ onRestart }: { onRestart: () => void }) {
 
 function MobileHome({
   openApp,
+  openProject,
   openExternal,
 }: {
   openApp: (appId: AppId) => void
+  openProject: (projectId: string) => void
   openExternal: (url: string) => void
 }) {
   const now = useClock()
@@ -448,6 +490,24 @@ function MobileHome({
             ))}
           </div>
         </section>
+
+        <section className="mt-9" aria-label="Project applications">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-black tracking-normal text-white">Project apps</h2>
+            <span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-bold text-zinc-300">
+              {installedProjects.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-x-3 gap-y-6">
+            {installedProjects.map((project) => (
+              <MobileProjectIcon
+                key={project.id}
+                project={project}
+                onOpen={() => openProject(project.id)}
+              />
+            ))}
+          </div>
+        </section>
       </div>
 
       <nav className="mobile-dock absolute inset-x-4 bottom-3 flex h-[72px] items-center justify-around px-3" aria-label="Favorite apps">
@@ -501,10 +561,12 @@ function MobileDockButton({
 function DesktopLayer({
   refreshPulse,
   openApp,
+  openProject,
   openExternal,
 }: {
   refreshPulse: boolean
   openApp: (appId: AppId) => void
+  openProject: (projectId: string) => void
   openExternal: (url: string) => void
 }) {
   return (
@@ -514,24 +576,47 @@ function DesktopLayer({
         <p className="text-xs text-zinc-400">Personal developer workstation</p>
       </div>
       <motion.div
-        className="grid w-fit grid-cols-3 gap-x-3 gap-y-4 sm:grid-cols-1 sm:gap-y-5"
+        className="absolute inset-0"
         animate={refreshPulse ? { scale: [1, 0.97, 1], opacity: [1, 0.72, 1] } : undefined}
         transition={{ duration: 0.36, ease: 'easeOut' }}
       >
-        {shortcuts.map((shortcut) => (
-          <DesktopIcon
-            key={shortcut.id}
-            label={shortcut.label}
-            iconName={shortcut.iconName}
-            onOpen={() => {
-              if (shortcut.kind === 'external' && shortcut.externalUrl) {
-                openExternal(shortcut.externalUrl)
-                return
-              }
-              if (shortcut.appId) openApp(shortcut.appId)
-            }}
-          />
-        ))}
+        <div className="absolute left-4 top-5 grid w-fit grid-cols-3 gap-x-3 gap-y-4 sm:left-6 sm:top-6 sm:grid-cols-1 sm:gap-y-5">
+          {shortcuts.map((shortcut) => (
+            <DesktopIcon
+              key={shortcut.id}
+              label={shortcut.label}
+              iconName={shortcut.iconName}
+              onOpen={() => {
+                if (shortcut.kind === 'external' && shortcut.externalUrl) {
+                  openExternal(shortcut.externalUrl)
+                  return
+                }
+                if (shortcut.appId) openApp(shortcut.appId)
+              }}
+            />
+          ))}
+        </div>
+
+        <section className="absolute bottom-24 left-4 right-4 top-[19rem] sm:left-32 sm:right-6 sm:top-[5.5rem]">
+          <div className="mb-4 flex items-center gap-3 text-white">
+            <span className="grid size-9 place-items-center rounded-xl border border-cyan-200/20 bg-cyan-300/10 text-cyan-100">
+              <Icon name="FolderKanban" className="size-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-black tracking-normal">Project apps</p>
+              <p className="text-xs text-zinc-400">{installedProjects.length} project cases available</p>
+            </div>
+          </div>
+          <div className="grid max-h-full grid-cols-[repeat(auto-fill,minmax(92px,92px))] content-start gap-x-4 gap-y-5 overflow-hidden pb-2">
+            {installedProjects.map((project) => (
+              <DesktopProjectIcon
+                key={project.id}
+                project={project}
+                onOpen={() => openProject(project.id)}
+              />
+            ))}
+          </div>
+        </section>
       </motion.div>
     </div>
   )
@@ -561,6 +646,84 @@ function DesktopIcon({
       </span>
       <span className="max-w-full rounded-md px-1 text-[11px] font-semibold leading-tight text-white drop-shadow">
         {label}
+      </span>
+    </button>
+  )
+}
+
+function DesktopProjectIcon({
+  project,
+  onOpen,
+}: {
+  project: ProjectCase
+  onOpen: () => void
+}) {
+  const cover = getProjectCover(project)
+
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onOpen()
+      }}
+      className="group flex h-[100px] w-[92px] flex-col items-center gap-2 rounded-xl p-2 text-center outline-none transition hover:bg-white/10 focus-visible:bg-white/12 focus-visible:ring-2 focus-visible:ring-cyan-300/60"
+      title={`Open ${project.name}`}
+    >
+      <span className="relative grid size-14 place-items-center overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/74 text-cyan-100 shadow-[0_8px_18px_rgba(0,0,0,0.22)] transition group-hover:-translate-y-0.5 group-hover:border-cyan-200/45">
+        {cover && (
+          <img
+            src={cover}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-300 group-hover:scale-105 group-hover:opacity-90"
+            loading="lazy"
+          />
+        )}
+        <span className="relative grid size-8 place-items-center rounded-xl border border-white/14 bg-black/45 text-white backdrop-blur-sm">
+          <ProjectIcon projectId={project.id} />
+        </span>
+        <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.55)]" />
+      </span>
+      <span className="line-clamp-2 max-w-full rounded-md px-1 text-[11px] font-semibold leading-tight text-white drop-shadow">
+        {project.name}
+      </span>
+    </button>
+  )
+}
+
+function MobileProjectIcon({
+  project,
+  onOpen,
+}: {
+  project: ProjectCase
+  onOpen: () => void
+}) {
+  const cover = getProjectCover(project)
+
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onOpen()
+      }}
+      className="group flex min-w-0 flex-col items-center gap-2 text-center outline-none active:scale-95"
+    >
+      <span className="relative grid size-14 place-items-center overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/78 text-cyan-100 shadow-[0_6px_8px_rgba(0,0,0,0.28)]">
+        {cover && (
+          <img
+            src={cover}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-75"
+            loading="lazy"
+          />
+        )}
+        <span className="relative grid size-8 place-items-center rounded-xl border border-white/12 bg-black/45 text-white backdrop-blur-sm">
+          <ProjectIcon projectId={project.id} />
+        </span>
+      </span>
+      <span className="line-clamp-2 w-full text-[11px] font-semibold leading-tight text-white">
+        {project.name}
       </span>
     </button>
   )
@@ -912,22 +1075,7 @@ function ProjectsApp({ openProject }: { openProject: (projectId: string) => void
 }
 
 function ProjectIcon({ projectId }: { projectId: string }) {
-  const projectIcons: Record<string, string> = {
-    'torneo-system': 'Trophy',
-    'colegio-system': 'School',
-    'finanzas-ve': 'WalletCards',
-    'gochito-system': 'ShoppingCart',
-    omstore: 'Store',
-    'emily-portfolio': 'BookOpen',
-    'invsystem-pro': 'Boxes',
-    'restaurant-system': 'UtensilsCrossed',
-    spotibad: 'Music2',
-    'canvas-game': 'Gamepad2',
-    knotchange: 'MessageCircle',
-    'portfolio-experiments': 'Monitor',
-  }
-
-  return <Icon name={projectIcons[projectId] ?? 'FolderOpen'} className="size-5" />
+  return <Icon name={getProjectIconName(projectId)} className="size-5" />
 }
 
 function ProjectCaseApp({
@@ -1058,10 +1206,11 @@ function ProjectPreview({ project }: { project: ProjectCase }) {
     spotibad: ['Spotify API', 'JWT auth', 'Playlists'],
   }
   const stats = projectStats[project.id] ?? ['Responsive UI', 'Typed flow', 'Clean modules']
+  const preview = project.screenshots[0]
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-4">
-      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/72">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="size-3 rounded-full bg-red-400" />
           <span className="size-3 rounded-full bg-amber-300" />
@@ -1069,28 +1218,52 @@ function ProjectPreview({ project }: { project: ProjectCase }) {
         </div>
         <p className="font-mono text-[11px] text-zinc-500">{project.folderName}</p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {stats.map((stat) => (
-          <div key={stat} className="rounded-xl border border-white/10 bg-white/[0.045] p-3">
-            <p className="text-[11px] font-bold text-cyan-200">MODULE</p>
-            <p className="mt-2 text-sm font-semibold">{stat}</p>
+
+      {preview ? (
+        <figure className="relative aspect-video overflow-hidden border-b border-white/10 bg-black">
+          <img
+            src={preview.src}
+            alt={preview.title}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+          <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/82 to-transparent px-4 pb-3 pt-10">
+            <p className="text-sm font-black tracking-normal text-white">{preview.title}</p>
+            <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-300">{preview.caption}</p>
+          </figcaption>
+        </figure>
+      ) : (
+        <div className="grid aspect-video place-items-center border-b border-white/10 bg-cyan-300/6">
+          <div className="grid size-20 place-items-center rounded-2xl border border-cyan-200/20 bg-cyan-300/10 text-cyan-100">
+            <Icon name={getProjectIconName(project.id)} className="size-9" />
           </div>
-        ))}
-      </div>
-      <div className="mt-4 space-y-2">
-        {project.features.slice(0, 4).map((feature, index) => (
-          <div key={feature} className="flex items-center gap-3">
-            <span className="grid size-6 place-items-center rounded-lg bg-cyan-300/10 font-mono text-[11px] text-cyan-100">
-              {index + 1}
-            </span>
-            <div className="h-2 flex-1 rounded-full bg-white/8">
-              <div
-                className="h-full rounded-full bg-cyan-300/70"
-                style={{ width: `${78 - index * 10}%` }}
-              />
+        </div>
+      )}
+
+      <div className="p-4">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {stats.map((stat) => (
+            <div key={stat} className="border-t border-white/10 pt-3">
+              <p className="text-[11px] font-bold text-cyan-200">MODULE</p>
+              <p className="mt-2 text-sm font-semibold">{stat}</p>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="mt-5 space-y-2">
+          {project.features.slice(0, 4).map((feature, index) => (
+            <div key={feature} className="flex items-center gap-3">
+              <span className="grid size-6 place-items-center rounded-lg bg-cyan-300/10 font-mono text-[11px] text-cyan-100">
+                {index + 1}
+              </span>
+              <div className="h-2 flex-1 rounded-full bg-white/8">
+                <div
+                  className="h-full rounded-full bg-cyan-300/70"
+                  style={{ width: `${78 - index * 10}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
