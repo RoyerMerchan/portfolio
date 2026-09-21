@@ -66,12 +66,19 @@ const projectIcons: Record<string, string> = {
 }
 
 const installedProjectIds = new Set([
+  'sportapp',
   'torneo-system',
   'colegio-system',
   'finanzas-ve',
   'gochito-system',
   'omstore',
   'emily-portfolio',
+  'invsystem-pro',
+  'restaurant-system',
+  'spotibad',
+  'knotchange',
+  'canvas-game',
+  'portfolio-experiments',
 ])
 
 const installedProjects = projects.filter((project) => installedProjectIds.has(project.id))
