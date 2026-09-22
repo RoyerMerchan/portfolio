@@ -283,8 +283,6 @@ export default function RoyerOS() {
           openApp={openApp}
           openProject={openProject}
           openExternal={openExternal}
-          onWallpaper={cycleWallpaper}
-          onShowDesktop={manager.minimizeAll}
         />
       )}
 
@@ -545,7 +543,7 @@ function WindowFrame({
         </div>
       ) : (
         <div
-          className={`flex h-11 shrink-0 items-center justify-between border-b border-white/10 bg-white/[0.045] px-3 ${
+          className={`windows-titlebar flex h-11 shrink-0 items-center justify-between border-b border-white/10 bg-white/[0.045] px-3 ${
             canDrag ? 'cursor-grab active:cursor-grabbing' : ''
           }`}
           onPointerDown={handlePointerDown}
@@ -1472,7 +1470,7 @@ function StartMenu({
 }) {
   return (
     <motion.div
-      className="fixed bottom-20 left-4 z-[130] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-white/12 bg-zinc-950/90 p-4 text-white shadow-[0_22px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:left-6"
+      className="windows-start-menu fixed bottom-20 left-4 z-[130] w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-white/12 bg-zinc-950/90 p-4 text-white shadow-[0_22px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:left-6"
       initial={{ opacity: 0, y: 16, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 14, scale: 0.98 }}
@@ -1488,7 +1486,10 @@ function StartMenu({
           <p className="text-sm text-zinc-400">{profile.role}</p>
         </div>
       </div>
-      <p className="mb-2 text-xs font-black text-zinc-500">APPLICATIONS</p>
+      <button type="button" className="windows-start-search" onClick={() => { onClose(); window.dispatchEvent(new Event('royeros-search')) }}>
+        <Icon name="Search" className="size-4" />Buscar aplicaciones y proyectos
+      </button>
+      <p className="mb-2 text-xs font-black text-zinc-400">Aplicaciones ancladas</p>
       <div className="grid grid-cols-2 gap-2">
         {(['about', 'projects', 'skills', 'terminal', 'contact', 'resume'] as AppId[]).map(
           (appId) => (
@@ -1498,6 +1499,7 @@ function StartMenu({
               onClick={() => openApp(appId)}
               className="rounded-xl border border-white/10 bg-white/[0.045] px-3 py-2 text-left text-sm font-semibold transition hover:bg-white/9"
             >
+              <Icon name={shortcuts.find((shortcut) => shortcut.appId === appId)?.iconName ?? 'Monitor'} className="mb-2 size-6 text-sky-200" />
               {appTitles[appId]}
             </button>
           ),
@@ -1562,7 +1564,7 @@ function ContextMenu({
       exit={{ opacity: 0, scale: 0.96 }}
       onClick={(event) => event.stopPropagation()}
     >
-      <MenuAction icon="Image" label="View" onClick={() => undefined} />
+      <MenuAction icon="FolderOpen" label="Abrir proyectos" onClick={() => openApp('projects')} />
       <MenuAction icon="RefreshCw" label="Refresh" onClick={refreshDesktop} />
       <MenuAction icon="SquareTerminal" label="Terminal" onClick={() => openApp('terminal')} />
       <MenuAction icon="UserRound" label="About RoyerOS" onClick={() => openApp('about')} />
@@ -1650,11 +1652,14 @@ function Taskbar({
           className={`grid size-11 shrink-0 place-items-center rounded-xl font-black transition ${
             startOpen ? 'bg-cyan-300 text-zinc-950' : 'bg-white/8 text-white hover:bg-white/14'
           }`}
-          title="Open RoyerOS launcher"
+          title="Inicio"
+          aria-label="Inicio"
+          aria-expanded={startOpen}
         >
-          RM
+          <span className="windows-start-symbol" aria-hidden="true"><i /><i /><i /><i /></span>
         </button>
         <TaskbarButton icon="SquareTerminal" label="Terminal" onClick={() => openApp('terminal')} />
+        <TaskbarButton icon="Search" label="Buscar" onClick={() => { setStartOpen(false); window.dispatchEvent(new Event('royeros-search')) }} />
         <TaskbarButton icon="FolderKanban" label="Projects" onClick={() => openApp('projects')} />
         <TaskbarButton icon="Mail" label="Contact" onClick={() => openApp('contact')} />
         <TaskbarButton icon="Github" label="GitHub" onClick={() => openExternal(profile.github)} />
