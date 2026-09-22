@@ -26,6 +26,7 @@ import {
 import { Icon } from './icons'
 import { RoyerWindow, useWindowManager } from './useWindowManager'
 import { MobileHome, MobileNavigation, MobileStatusBar, mobileWindowTitle } from './MobileShell'
+import DesktopWorkspace from './DesktopWorkspace'
 
 type SystemState = 'booting' | 'desktop' | 'shutdown'
 type WallpaperId = 'grid' | 'midnight' | 'gradient'
@@ -88,9 +89,6 @@ function getProjectIconName(projectId: string) {
   return projectIcons[projectId] ?? 'FolderOpen'
 }
 
-function getProjectCover(project: ProjectCase) {
-  return project.screenshots[0]?.src
-}
 
 function useClock() {
   const [now, setNow] = useState(() => new Date())
@@ -258,7 +256,7 @@ export default function RoyerOS() {
 
   return (
     <div
-      className={`royer-os wallpaper-${wallpaper}${isMobile ? ' phone-shell' : ''}`}
+      className={`royer-os wallpaper-${wallpaper}${isMobile ? ' phone-shell' : ' desktop-shell'}`}
       onClick={() => {
         setContextMenu(null)
         setStartOpen(false)
@@ -280,11 +278,13 @@ export default function RoyerOS() {
           hidden={Boolean(activeMobileWindow)}
         />
       ) : (
-        <DesktopLayer
+        <DesktopWorkspace
           refreshPulse={refreshPulse}
           openApp={openApp}
           openProject={openProject}
           openExternal={openExternal}
+          onWallpaper={cycleWallpaper}
+          onShowDesktop={manager.minimizeAll}
         />
       )}
 
@@ -356,6 +356,7 @@ export default function RoyerOS() {
           openApp={openApp}
           openExternal={openExternal}
           restoreWindow={manager.restoreWindow}
+          showDesktop={manager.minimizeAll}
           collapsed={taskbarCollapsed}
           onToggleCollapse={toggleTaskbar}
         />
@@ -430,139 +431,6 @@ function ShutdownScreen({ onRestart }: { onRestart: () => void }) {
   )
 }
 
-function DesktopLayer({
-  refreshPulse,
-  openApp,
-  openProject,
-  openExternal,
-}: {
-  refreshPulse: boolean
-  openApp: (appId: AppId) => void
-  openProject: (projectId: string) => void
-  openExternal: (url: string) => void
-}) {
-  return (
-    <div className="absolute inset-0 overflow-hidden px-4 py-5 sm:px-6 sm:py-6">
-      <div className="pointer-events-none absolute right-5 top-5 hidden max-w-sm text-right sm:block">
-        <p className="text-sm font-semibold text-white">RoyerOS</p>
-        <p className="text-xs text-zinc-400">Personal developer workstation</p>
-      </div>
-      <motion.div
-        className="absolute inset-0"
-        animate={refreshPulse ? { scale: [1, 0.97, 1], opacity: [1, 0.72, 1] } : undefined}
-        transition={{ duration: 0.36, ease: 'easeOut' }}
-      >
-        <div className="absolute left-4 top-5 grid w-fit grid-cols-3 gap-x-3 gap-y-4 sm:left-6 sm:top-6 sm:grid-cols-1 sm:gap-y-5">
-          {shortcuts.map((shortcut) => (
-            <DesktopIcon
-              key={shortcut.id}
-              label={shortcut.label}
-              iconName={shortcut.iconName}
-              onOpen={() => {
-                if (shortcut.kind === 'external' && shortcut.externalUrl) {
-                  openExternal(shortcut.externalUrl)
-                  return
-                }
-                if (shortcut.appId) openApp(shortcut.appId)
-              }}
-            />
-          ))}
-        </div>
-
-        <section className="absolute bottom-24 left-4 right-4 top-[19rem] sm:left-32 sm:right-6 sm:top-[5.5rem]">
-          <div className="mb-4 flex items-center gap-3 text-white">
-            <span className="grid size-9 place-items-center rounded-xl border border-cyan-200/20 bg-cyan-300/10 text-cyan-100">
-              <Icon name="FolderKanban" className="size-4" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-black tracking-normal">Project apps</p>
-              <p className="text-xs text-zinc-400">{installedProjects.length} project cases available</p>
-            </div>
-          </div>
-          <div className="grid max-h-full grid-cols-[repeat(auto-fill,minmax(92px,92px))] content-start gap-x-4 gap-y-5 overflow-hidden pb-2">
-            {installedProjects.map((project) => (
-              <DesktopProjectIcon
-                key={project.id}
-                project={project}
-                onOpen={() => openProject(project.id)}
-              />
-            ))}
-          </div>
-        </section>
-      </motion.div>
-    </div>
-  )
-}
-
-function DesktopIcon({
-  label,
-  iconName,
-  onOpen,
-}: {
-  label: string
-  iconName: string
-  onOpen: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation()
-        onOpen()
-      }}
-      className="group flex w-[88px] flex-col items-center gap-2 rounded-xl p-2 text-center outline-none transition hover:bg-white/10 focus-visible:bg-white/12 focus-visible:ring-2 focus-visible:ring-cyan-300/60"
-      title={`Open ${label}`}
-    >
-      <span className="grid size-12 place-items-center rounded-2xl border border-white/12 bg-zinc-950/70 text-cyan-200 shadow-[0_8px_18px_rgba(0,0,0,0.22)] transition group-hover:-translate-y-0.5 group-hover:border-cyan-200/45 group-hover:bg-cyan-300/10">
-        <Icon name={iconName} className="size-6" />
-      </span>
-      <span className="max-w-full rounded-md px-1 text-[11px] font-semibold leading-tight text-white drop-shadow">
-        {label}
-      </span>
-    </button>
-  )
-}
-
-function DesktopProjectIcon({
-  project,
-  onOpen,
-}: {
-  project: ProjectCase
-  onOpen: () => void
-}) {
-  const cover = getProjectCover(project)
-
-  return (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation()
-        onOpen()
-      }}
-      className="group flex h-[100px] w-[92px] flex-col items-center gap-2 rounded-xl p-2 text-center outline-none transition hover:bg-white/10 focus-visible:bg-white/12 focus-visible:ring-2 focus-visible:ring-cyan-300/60"
-      title={`Open ${project.name}`}
-    >
-      <span className="relative grid size-14 place-items-center overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/74 text-cyan-100 shadow-[0_8px_18px_rgba(0,0,0,0.22)] transition group-hover:-translate-y-0.5 group-hover:border-cyan-200/45">
-        {cover && (
-          <img
-            src={cover}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-300 group-hover:scale-105 group-hover:opacity-90"
-            loading="lazy"
-          />
-        )}
-        <span className="relative grid size-8 place-items-center rounded-xl border border-white/14 bg-black/45 text-white backdrop-blur-sm">
-          <ProjectIcon projectId={project.id} />
-        </span>
-        <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.55)]" />
-      </span>
-      <span className="line-clamp-2 max-w-full rounded-md px-1 text-[11px] font-semibold leading-tight text-white drop-shadow">
-        {project.name}
-      </span>
-    </button>
-  )
-}
-
 function WindowFrame({
   item,
   isMobile,
@@ -595,6 +463,7 @@ function WindowFrame({
   }, [isMobile, mobileActive])
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('button')) return
     focusWindow(item.id)
     if (!canDrag || event.button !== 0) return
 
@@ -629,10 +498,11 @@ function WindowFrame({
           height: 'auto',
         }
       : {
-          left: item.position.x,
-          top: item.position.y,
+          left: `min(${item.position.x}px, max(16px, calc(100vw - ${item.size.width}px - 16px)))`,
+          top: `min(${item.position.y}px, max(68px, calc(100dvh - ${item.size.height}px - 86px)))`,
           width: item.size.width,
           height: item.size.height,
+          maxHeight: 'calc(100dvh - 154px)',
         }
 
   return (
@@ -643,7 +513,7 @@ function WindowFrame({
       className={
         isMobile
           ? 'mobile-window fixed flex min-h-0 flex-col overflow-hidden bg-zinc-950 text-white'
-          : 'fixed flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 text-white shadow-[0_20px_44px_rgba(0,0,0,0.45)] backdrop-blur-2xl'
+          : 'desktop-window fixed flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 text-white shadow-[0_20px_44px_rgba(0,0,0,0.45)] backdrop-blur-2xl'
       }
       style={{ ...fixedStyle, zIndex: isMobile ? 40 : item.zIndex }}
       initial={isMobile ? { opacity: 0, x: 18 } : { opacity: 0, scale: 0.98, y: 10 }}
@@ -679,6 +549,9 @@ function WindowFrame({
             canDrag ? 'cursor-grab active:cursor-grabbing' : ''
           }`}
           onPointerDown={handlePointerDown}
+          onDoubleClick={(event) => {
+            if (!(event.target as HTMLElement).closest('button')) toggleMaximize(item.id)
+          }}
         >
           <div className="flex min-w-0 items-center gap-2">
             <div className="flex items-center gap-1.5">
@@ -1726,6 +1599,7 @@ function Taskbar({
   openApp,
   openExternal,
   restoreWindow,
+  showDesktop,
   collapsed,
   onToggleCollapse,
 }: {
@@ -1735,6 +1609,7 @@ function Taskbar({
   openApp: (appId: AppId) => void
   openExternal: (url: string) => void
   restoreWindow: (windowId: string) => void
+  showDesktop: () => void
   collapsed: boolean
   onToggleCollapse: () => void
 }) {
@@ -1762,7 +1637,7 @@ function Taskbar({
   }
 
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-[120] flex justify-center px-3 pb-3 pointer-events-none">
+    <footer className="desktop-taskbar fixed inset-x-0 bottom-0 z-[120] flex justify-center px-3 pb-3 pointer-events-none">
       <div
         className="pointer-events-auto flex h-16 w-full max-w-5xl items-center gap-2 overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/76 px-3 shadow-[0_14px_40px_rgba(0,0,0,0.38)] backdrop-blur-2xl"
       >
@@ -1783,6 +1658,7 @@ function Taskbar({
         <TaskbarButton icon="FolderKanban" label="Projects" onClick={() => openApp('projects')} />
         <TaskbarButton icon="Mail" label="Contact" onClick={() => openApp('contact')} />
         <TaskbarButton icon="Github" label="GitHub" onClick={() => openExternal(profile.github)} />
+        <TaskbarButton icon="Home" label="Mostrar escritorio" onClick={showDesktop} />
 
         <div className="mx-1 h-8 w-px shrink-0 bg-white/10" />
 
