@@ -133,6 +133,10 @@ export function useWindowManager() {
     )
   }, [])
 
+  const minimizeAll = useCallback(() => {
+    setWindows((current) => current.map((item) => ({ ...item, minimized: true })))
+  }, [])
+
   const toggleMaximize = useCallback(
     (windowId: string) => {
       const nextZ = bumpZ()
@@ -184,6 +188,7 @@ export function useWindowManager() {
     openProject,
     closeWindow,
     minimizeWindow,
+    minimizeAll,
     toggleMaximize,
     focusWindow,
     moveWindow,

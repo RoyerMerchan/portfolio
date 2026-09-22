@@ -25,6 +25,7 @@ import {
 } from '@/data/royeros'
 import { Icon } from './icons'
 import { RoyerWindow, useWindowManager } from './useWindowManager'
+import { MobileHome, MobileNavigation, MobileStatusBar, mobileWindowTitle } from './MobileShell'
 
 type SystemState = 'booting' | 'desktop' | 'shutdown'
 type WallpaperId = 'grid' | 'midnight' | 'gradient'
@@ -138,8 +139,9 @@ export default function RoyerOS() {
   const [taskbarCollapsed, setTaskbarCollapsed] = useState(getStoredTaskbarState)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const prefersReducedMotion = useReducedMotion()
-  const isMobile = useMediaQuery('(max-width: 760px)')
+  const isMobile = useMediaQuery('(max-width: 760px), (max-width: 1024px) and (max-height: 500px) and (pointer: coarse)')
   const manager = useWindowManager()
+  const activeMobileWindow = manager.visibleWindows[manager.visibleWindows.length - 1]
 
   const notify = useCallback((title: string, message: string) => {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -178,15 +180,13 @@ export default function RoyerOS() {
   )
 
   const cycleWallpaper = useCallback(() => {
-    setWallpaper((current) => {
-      const index = wallpapers.findIndex((item) => item.id === current)
-      const next = wallpapers[(index + 1) % wallpapers.length].id
-      window.localStorage.setItem('royeros-wallpaper', next)
-      notify('Wallpaper changed', wallpapers.find((item) => item.id === next)?.label ?? next)
-      return next
-    })
+    const index = wallpapers.findIndex((item) => item.id === wallpaper)
+    const next = wallpapers[(index + 1) % wallpapers.length]
+    setWallpaper(next.id)
+    window.localStorage.setItem('royeros-wallpaper', next.id)
+    notify(isMobile ? 'Fondo actualizado' : 'Wallpaper changed', next.label)
     setContextMenu(null)
-  }, [notify])
+  }, [isMobile, notify, wallpaper])
 
   const refreshDesktop = useCallback(() => {
     setRefreshPulse(true)
@@ -258,7 +258,7 @@ export default function RoyerOS() {
 
   return (
     <div
-      className={`royer-os wallpaper-${wallpaper}`}
+      className={`royer-os wallpaper-${wallpaper}${isMobile ? ' phone-shell' : ''}`}
       onClick={() => {
         setContextMenu(null)
         setStartOpen(false)
@@ -272,9 +272,12 @@ export default function RoyerOS() {
     >
       {isMobile ? (
         <MobileHome
+          projects={installedProjects}
           openApp={openApp}
           openProject={openProject}
           openExternal={openExternal}
+          onWallpaper={cycleWallpaper}
+          hidden={Boolean(activeMobileWindow)}
         />
       ) : (
         <DesktopLayer
@@ -286,11 +289,12 @@ export default function RoyerOS() {
       )}
 
       <AnimatePresence>
-        {manager.visibleWindows.map((item) => (
+        {(isMobile ? manager.windows : manager.visibleWindows).map((item) => (
           <WindowFrame
             key={item.id}
             item={item}
             isMobile={isMobile}
+            mobileActive={item.id === activeMobileWindow?.id}
             taskbarCollapsed={taskbarCollapsed}
             focusWindow={manager.focusWindow}
             closeWindow={manager.closeWindow}
@@ -308,6 +312,18 @@ export default function RoyerOS() {
           </WindowFrame>
         ))}
       </AnimatePresence>
+
+      {isMobile && <>
+        <MobileStatusBar />
+        <MobileNavigation
+          windows={manager.windows}
+          activeWindow={activeMobileWindow}
+          onHome={manager.minimizeAll}
+          onBack={() => { if (activeMobileWindow) manager.closeWindow(activeMobileWindow.id) }}
+          onRestore={manager.restoreWindow}
+          onClose={manager.closeWindow}
+        />
+      </>}
 
       <AnimatePresence>
         {startOpen && (
@@ -411,157 +427,6 @@ function ShutdownScreen({ onRestart }: { onRestart: () => void }) {
         </button>
       </div>
     </main>
-  )
-}
-
-function MobileHome({
-  openApp,
-  openProject,
-  openExternal,
-}: {
-  openApp: (appId: AppId) => void
-  openProject: (projectId: string) => void
-  openExternal: (url: string) => void
-}) {
-  const now = useClock()
-  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-  const launchShortcut = (shortcut: (typeof shortcuts)[number]) => {
-    if (shortcut.kind === 'external' && shortcut.externalUrl) {
-      openExternal(shortcut.externalUrl)
-      return
-    }
-    if (shortcut.appId) openApp(shortcut.appId)
-  }
-
-  return (
-    <main className="mobile-home absolute inset-0 flex flex-col overflow-hidden text-white">
-      <div className="mobile-status-bar flex shrink-0 items-center justify-between px-5 text-xs font-bold">
-        <span>{time}</span>
-        <div className="flex items-center gap-2" aria-label="Connection and battery status">
-          <Icon name="Wifi" className="size-4" />
-          <Icon name="BatteryMedium" className="size-5" />
-        </div>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-28 pt-3">
-        <header className="mb-8 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-cyan-100">RoyerOS Mobile</p>
-            <h1 className="mt-1 text-2xl font-black tracking-normal">Hola, soy Royer.</h1>
-          </div>
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation()
-              openApp('about')
-            }}
-            className="grid size-12 place-items-center rounded-2xl bg-cyan-300 text-base font-black text-zinc-950 shadow-[0_6px_8px_rgba(0,0,0,0.28)] active:scale-95"
-            aria-label="Open profile"
-          >
-            RM
-          </button>
-        </header>
-
-        <section className="mb-8 border-y border-white/12 py-5">
-          <p className="max-w-[28rem] text-xl font-bold leading-7 text-white">
-            Full Stack Developer enfocado en sistemas reales, APIs e interfaces claras.
-          </p>
-          <div className="mt-4 flex items-center gap-2 text-sm text-emerald-200">
-            <span className="size-2 rounded-full bg-emerald-300" />
-            Disponible para nuevos proyectos
-          </div>
-        </section>
-
-        <section aria-label="Applications">
-          <div className="grid grid-cols-4 gap-x-3 gap-y-6">
-            {shortcuts.map((shortcut) => (
-              <button
-                key={shortcut.id}
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  launchShortcut(shortcut)
-                }}
-                className="group flex min-w-0 flex-col items-center gap-2 text-center outline-none active:scale-95"
-              >
-                <span
-                  className={`grid size-14 place-items-center rounded-2xl shadow-[0_6px_8px_rgba(0,0,0,0.28)] ${mobileAppTone(shortcut.id)}`}
-                >
-                  <Icon name={shortcut.iconName} className="size-6" />
-                </span>
-                <span className="w-full truncate text-[11px] font-semibold text-white">
-                  {shortcut.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-9" aria-label="Project applications">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-black tracking-normal text-white">Project apps</h2>
-            <span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-bold text-zinc-300">
-              {installedProjects.length}
-            </span>
-          </div>
-          <div className="grid grid-cols-4 gap-x-3 gap-y-6">
-            {installedProjects.map((project) => (
-              <MobileProjectIcon
-                key={project.id}
-                project={project}
-                onOpen={() => openProject(project.id)}
-              />
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <nav className="mobile-dock absolute inset-x-4 bottom-3 flex h-[72px] items-center justify-around px-3" aria-label="Favorite apps">
-        <MobileDockButton icon="UserRound" label="About" onClick={() => openApp('about')} />
-        <MobileDockButton icon="FolderKanban" label="Projects" onClick={() => openApp('projects')} />
-        <MobileDockButton icon="Mail" label="Contact" onClick={() => openApp('contact')} />
-        <MobileDockButton icon="Github" label="GitHub" onClick={() => openExternal(profile.github)} />
-      </nav>
-    </main>
-  )
-}
-
-function mobileAppTone(shortcutId: string) {
-  const tones: Record<string, string> = {
-    about: 'bg-cyan-300 text-zinc-950',
-    projects: 'bg-emerald-300 text-zinc-950',
-    skills: 'bg-violet-400 text-white',
-    terminal: 'bg-zinc-900 text-cyan-200 ring-1 ring-white/15',
-    contact: 'bg-blue-500 text-white',
-    resume: 'bg-amber-300 text-zinc-950',
-    github: 'bg-white text-zinc-950',
-    trash: 'bg-zinc-700 text-zinc-100',
-  }
-  return tones[shortcutId] ?? 'bg-zinc-800 text-white'
-}
-
-function MobileDockButton({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: string
-  label: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation()
-        onClick()
-      }}
-      className="grid size-12 place-items-center rounded-2xl bg-white/10 text-white outline-none transition active:scale-95 active:bg-white/20"
-      aria-label={label}
-    >
-      <Icon name={icon} className="size-5" />
-    </button>
   )
 }
 
@@ -698,47 +563,10 @@ function DesktopProjectIcon({
   )
 }
 
-function MobileProjectIcon({
-  project,
-  onOpen,
-}: {
-  project: ProjectCase
-  onOpen: () => void
-}) {
-  const cover = getProjectCover(project)
-
-  return (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation()
-        onOpen()
-      }}
-      className="group flex min-w-0 flex-col items-center gap-2 text-center outline-none active:scale-95"
-    >
-      <span className="relative grid size-14 place-items-center overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/78 text-cyan-100 shadow-[0_6px_8px_rgba(0,0,0,0.28)]">
-        {cover && (
-          <img
-            src={cover}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-75"
-            loading="lazy"
-          />
-        )}
-        <span className="relative grid size-8 place-items-center rounded-xl border border-white/12 bg-black/45 text-white backdrop-blur-sm">
-          <ProjectIcon projectId={project.id} />
-        </span>
-      </span>
-      <span className="line-clamp-2 w-full text-[11px] font-semibold leading-tight text-white">
-        {project.name}
-      </span>
-    </button>
-  )
-}
-
 function WindowFrame({
   item,
   isMobile,
+  mobileActive,
   taskbarCollapsed,
   children,
   focusWindow,
@@ -749,6 +577,7 @@ function WindowFrame({
 }: {
   item: RoyerWindow
   isMobile: boolean
+  mobileActive: boolean
   taskbarCollapsed: boolean
   children: React.ReactNode
   focusWindow: (windowId: string) => void
@@ -758,7 +587,12 @@ function WindowFrame({
   moveWindow: (windowId: string, x: number, y: number) => void
 }) {
   const dragOffset = useRef({ x: 0, y: 0 })
+  const frameRef = useRef<HTMLElement>(null)
   const canDrag = !item.maximized && !isMobile
+
+  useEffect(() => {
+    if (isMobile && mobileActive) frameRef.current?.focus({ preventScroll: true })
+  }, [isMobile, mobileActive])
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     focusWindow(item.id)
@@ -787,7 +621,7 @@ function WindowFrame({
   }
 
   const fixedStyle = isMobile
-    ? { inset: 0, width: 'auto', height: 'auto' }
+    ? { display: mobileActive ? undefined : 'none' }
     : item.maximized
       ? {
           inset: taskbarCollapsed ? '14px' : '14px 14px 86px',
@@ -803,19 +637,22 @@ function WindowFrame({
 
   return (
     <motion.section
+      ref={frameRef}
+      tabIndex={-1}
+      inert={isMobile && !mobileActive}
       className={
         isMobile
           ? 'mobile-window fixed flex min-h-0 flex-col overflow-hidden bg-zinc-950 text-white'
           : 'fixed flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/12 bg-zinc-950/88 text-white shadow-[0_20px_44px_rgba(0,0,0,0.45)] backdrop-blur-2xl'
       }
-      style={{ ...fixedStyle, zIndex: item.zIndex }}
+      style={{ ...fixedStyle, zIndex: isMobile ? 40 : item.zIndex }}
       initial={isMobile ? { opacity: 0, x: 18 } : { opacity: 0, scale: 0.98, y: 10 }}
       animate={isMobile ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1, y: 0 }}
       exit={isMobile ? { opacity: 0, x: 18 } : { opacity: 0, scale: 0.98, y: 10 }}
       transition={{ duration: 0.12, ease: 'easeOut' }}
       onMouseDown={() => focusWindow(item.id)}
       role="dialog"
-      aria-label={item.title}
+      aria-label={isMobile ? mobileWindowTitle(item) : item.title}
     >
       {isMobile ? (
         <div className="mobile-app-header relative flex shrink-0 items-end justify-between border-b border-white/10 px-2 pb-2">
@@ -826,13 +663,13 @@ function WindowFrame({
               closeWindow(item.id)
             }}
             className="flex min-h-11 min-w-11 items-center gap-1 rounded-xl px-2 text-sm font-semibold text-cyan-200 transition active:bg-white/10"
-            aria-label={`Close ${item.title}`}
+            aria-label={`Volver de ${mobileWindowTitle(item)}`}
           >
             <Icon name="ChevronLeft" className="size-5" />
             Atrás
           </button>
           <p className="pointer-events-none absolute inset-x-20 bottom-5 truncate text-center text-sm font-bold text-white">
-            {item.title}
+            {mobileWindowTitle(item)}
           </p>
           <span className="size-11" aria-hidden="true" />
         </div>
@@ -884,7 +721,7 @@ function WindowFrame({
           <p className="font-mono text-[10px] text-zinc-500">RoyerOS</p>
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+      <div className="window-content min-h-0 flex-1 overflow-auto">{children}</div>
     </motion.section>
   )
 }
@@ -946,7 +783,7 @@ function AboutApp({
   openExternal: (url: string) => void
 }) {
   return (
-    <div className="grid min-h-full gap-6 p-5 md:grid-cols-[240px_1fr] md:p-6">
+    <div className="about-app grid min-h-full gap-6 p-5 md:grid-cols-[240px_1fr] md:p-6">
       <div className="space-y-4">
         <div className="overflow-hidden rounded-2xl border border-white/12 bg-white/7">
           <img
@@ -1015,7 +852,7 @@ function ProjectsApp({ openProject }: { openProject: (projectId: string) => void
   }, [activeCategory])
 
   return (
-    <div className="grid min-h-full md:grid-cols-[210px_1fr]">
+    <div className="projects-app grid min-h-full md:grid-cols-[210px_1fr]">
       <aside className="border-b border-white/10 bg-white/[0.035] p-4 md:border-b-0 md:border-r">
         <div className="mb-4 flex items-center gap-2 text-sm font-bold">
           <Icon name="FolderKanban" className="size-4 text-cyan-200" />
@@ -1066,11 +903,11 @@ function ProjectsApp({ openProject }: { openProject: (projectId: string) => void
                   {project.status}
                 </span>
               </div>
-              <p className="font-bold text-white">{project.folderName}</p>
+              <p className="break-words font-bold text-white">{project.folderName}</p>
               <p className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">
                 {project.description}
               </p>
-              <p className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-cyan-200 opacity-0 transition group-hover:opacity-100">
+              <p className="project-open-hint mt-4 inline-flex items-center gap-1 text-xs font-bold text-cyan-200 opacity-0 transition group-hover:opacity-100">
                 Open case study <Icon name="ChevronRight" className="size-3.5" />
               </p>
             </button>
@@ -2007,7 +1844,7 @@ function TaskbarButton({
 
 function NotificationStack({ notifications }: { notifications: NotificationItem[] }) {
   return (
-    <div className="fixed right-3 top-3 z-[150] flex w-[min(360px,calc(100vw-1.5rem))] flex-col gap-2">
+    <div className="notification-stack fixed right-3 top-3 z-[150] flex w-[min(360px,calc(100vw-1.5rem))] flex-col gap-2" role="status" aria-live="polite">
       <AnimatePresence>
         {notifications.map((notification) => (
           <motion.div

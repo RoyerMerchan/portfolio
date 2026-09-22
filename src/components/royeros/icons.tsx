@@ -119,6 +119,8 @@ interface IconProps extends Omit<ComponentProps<LucideIcon>, 'ref'> {
 }
 
 export function Icon({ name, ...props }: IconProps) {
-  const Lucide = iconMap[name] ?? Circle
+  const Lucide = Object.prototype.hasOwnProperty.call(iconMap, name)
+    ? iconMap[name as keyof typeof iconMap]
+    : Circle
   return <Lucide {...props} />
 }
